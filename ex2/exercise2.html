@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>euclid · fermat — step‑by‑step manual logic</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      background: #f4f7fb;
+      min-height: 100vh;
+      display: flex;
+    }
+    /* ========= LEFT NAVIGATION ========= */
+    .nav-left {
+      width: 260px;
+      background: #1e2b3c;
+      color: #e9edf2;
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 0.5rem;
+      box-shadow: 4px 0 12px rgba(0,0,0,0.08);
+    }
+    .nav-left h2 {
+      font-weight: 400;
+      font-size: 1.3rem;
+      letter-spacing: 1px;
+      padding: 0 1rem 1.5rem;
+      border-bottom: 1px solid #3a4c62;
+      margin-bottom: 2rem;
+    }
+    .nav-left button {
+      background: transparent;
+      border: none;
+      color: #b6c8d9;
+      font-size: 1.1rem;
+      padding: 1rem 1.2rem;
+      text-align: left;
+      width: 100%;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.15s;
+      font-weight: 450;
+      margin-bottom: 0.4rem;
+    }
+    .nav-left button:hover {
+      background: #2d4055;
+      color: white;
+    }
+    .nav-left button.active {
+      background: #2c4a6e;
+      color: white;
+      box-shadow: 0 2px 5px #0f1a24;
+    }
+    /* ========= MAIN CONTENT ========= */
+    .main-right {
+      flex: 1;
+      padding: 2rem 2.5rem;
+      overflow-y: auto;
+    }
+    .card {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 28px;
+      padding: 2rem 2.5rem;
+      box-shadow: 0 18px 30px -12px rgba(0,20,40,0.2);
+    }
+    h1 {
+      font-weight: 350;
+      font-size: 2.2rem;
+      color: #173342;
+      margin-bottom: 0.75rem;
+      border-left: 6px solid #3f6b9c;
+      padding-left: 1.2rem;
+    }
+    .sub {
+      color: #3f5e7a;
+      margin-bottom: 2rem;
+      font-style: italic;
+    }
+    .input-panel {
+      background: #f0f4fa;
+      border-radius: 24px;
+      padding: 1.8rem 2rem;
+      margin: 1.5rem 0 2rem;
+    }
+    .input-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem 2.5rem;
+      align-items: flex-end;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+    }
+    .field label {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #2d4b6b;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+    .field input {
+      background: white;
+      border: 1px solid #b9cbd9;
+      border-radius: 30px;
+      padding: 0.7rem 1.2rem;
+      font-size: 1rem;
+      width: 180px;
+      font-family: 'JetBrains Mono', monospace;
+      transition: 0.15s;
+    }
+    .field input:focus {
+      outline: none;
+      border-color: #2f6396;
+      box-shadow: 0 0 0 3px rgba(47,99,150,0.2);
+    }
+    .btn-run {
+      background: #1e3b5a;
+      border: none;
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      padding: 0.7rem 2.4rem;
+      border-radius: 40px;
+      cursor: pointer;
+      letter-spacing: 0.3px;
+      box-shadow: 0 6px 12px rgba(20,50,70,0.25);
+      transition: 0.1s;
+    }
+    .btn-run:hover {
+      background: #143049;
+      transform: scale(1.02);
+    }
+    .result-header {
+      font-size: 1.3rem;
+      font-weight: 500;
+      color: #1f3d5a;
+      margin: 2rem 0 0.8rem;
+    }
+    .final-gcd-box {
+      background: #172f42;
+      color: white;
+      border-radius: 30px;
+      padding: 1.3rem 2rem;
+      font-size: 1.5rem;
+      display: inline-block;
+      margin-bottom: 1.5rem;
+    }
+    .steps-container {
+      background: #e9f0f9;
+      border-radius: 24px;
+      padding: 1.5rem 1.8rem;
+      font-family: 'Fira Code', 'JetBrains Mono', monospace;
+      border: 1px solid #c9ddf2;
+      overflow-x: auto;
+    }
+    .step-line {
+      padding: 0.4rem 0;
+      border-bottom: 1px dashed #aac2db;
+      font-size: 1rem;
+      color: #102331;
+    }
+    .step-line:last-child {
+      border-bottom: none;
+    }
+    .step-line strong {
+      color: #113955;
+      background: #d4e3f5;
+      padding: 0.2rem 0.6rem;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      margin-right: 0.8rem;
+    }
+    .fermat-step {
+      background: #fcf9f0;
+      padding: 0.7rem 1rem;
+      border-left: 5px solid #3f6b9c;
+      margin: 0.8rem 0;
+      font-family: monospace;
+      white-space: pre-wrap;
+      border-radius: 12px;
+    }
+    .info-note {
+      margin-top: 2rem;
+      padding: 1.2rem 1.8rem;
+      background: #eaf1f9;
+      border-radius: 24px;
+      font-size: 0.95rem;
+      border-left: 4px solid #3f6b9c;
+    }
+    hr {
+      border: none;
+      border-top: 2px dashed #b9cfec;
+      margin: 2rem 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- LEFT NAVIGATION -->
+  <nav class="nav-left">
+    <h2>Exercie: 1-B <br>Number theory</h2>
+    <button id="navEuclid" class="active">📐 Euclid algorithm</button>
+    <button id="navFermat">✧ Fermat's theorem</button>
+    <div style="flex:1"></div>
+    <div style="font-size:0.85rem; padding:1rem; color:#6a85a0; border-top:1px solid #2d4055;">
+      ⚡ pure logic · all steps shown<br> no built‑in gcd / pow / mod
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT (dynamic) -->
+  <main class="main-right" id="mainPanel"></main>
+
+  <script>
+    (function() {
+      // ---------- MANUAL CORE FUNCTIONS (no built‑ins) ----------
+
+      // manual remainder (no % operator)
+      function manualRemainder(dividend, divisor) {
+        if (divisor === 0) return 0; // undefined, but safe
+        let absDividend = dividend < 0 ? -dividend : dividend;
+        let absDivisor = divisor < 0 ? -divisor : divisor;
+        // subtract until less than divisor
+        let remainder = absDividend;
+        while (remainder >= absDivisor) {
+          remainder = remainder - absDivisor;
+        }
+        // adjust sign if original dividend negative (keep mathematical remainder positive)
+        if (dividend < 0 && remainder !== 0) remainder = absDivisor - remainder;
+        return remainder;
+      }
+
+      // manual multiplication (repeated addition)
+      function manualMultiply(a, b) {
+        let absA = a < 0 ? -a : a;
+        let absB = b < 0 ? -b : b;
+        let result = 0;
+        for (let i = 0; i < absB; i++) {
+          result = result + absA;
+        }
+        if ((a < 0 && b > 0) || (a > 0 && b < 0)) result = -result;
+        return result;
+      }
+
+      // ---------- EUCLID WITH INTERMEDIATE STEPS ----------
+      function euclidWithSteps(a, b) {
+        let x = a < 0 ? -a : a;
+        let y = b < 0 ? -b : b;
+        let steps = [];
+        let stepIndex = 1;
+
+        // preserve original for display
+        let originalX = x, originalY = y;
+
+        if (x === 0 && y === 0) {
+          return { gcd: 0, steps: [{ description: "both zero → gcd(0,0) = 0" }] };
+        }
+
+        while (y !== 0) {
+          // manual quotient & remainder via subtraction
+          let remainder = x;
+          let quotient = 0;
+          while (remainder >= y) {
+            remainder = remainder - y;
+            quotient++;
+          }
+          // store step
+          steps.push({
+            step: stepIndex++,
+            a: x,
+            b: y,
+            quotient: quotient,
+            remainder: remainder,
+            description: `${x} = ${quotient} · ${y} + ${remainder}`
+          });
+          x = y;
+          y = remainder;
+        }
+        // final gcd = x
+        return { gcd: x, steps: steps };
+      }
+
+      // ---------- FERMAT WITH INTERMEDIATE STEPS (modular exponentiation) ----------
+      // returns object { result, steps: [...] }
+      function fermatStepsManual(base, exp, mod) {
+        if (mod === 1) return { result: 0, steps: ["mod = 1 → result 0"] };
+        let steps = [];
+        let result = 1;
+        let b = base;
+        let e = exp;
+        // initial reduction of base mod m
+        let baseMod = manualRemainder(b, mod);
+        steps.push(`initial: base = ${base}, reduce base mod ${mod} → ${baseMod}`);
+        b = baseMod;
+
+        while (e > 0) {
+          // check if e odd (manual remainder 2)
+          let remainderE = manualRemainder(e, 2);
+          if (remainderE === 1) {  // odd
+            steps.push(`exponent ${e} is odd → multiply result (${result}) by base (${b})`);
+            let product = manualMultiply(result, b);
+            steps.push(`  product = ${result} · ${b} = ${product}`);
+            result = manualRemainder(product, mod);
+            steps.push(`  reduce mod ${mod} → ${result}`);
+          } else {
+            steps.push(`exponent ${e} is even → keep result = ${result}`);
+          }
+          // square the base
+          e = Math.floor(e / 2);   // integer division (no built-in problem, it's just shift)
+          if (e > 0) {
+            let square = manualMultiply(b, b);
+            steps.push(`square base: ${b}² = ${square}`);
+            b = manualRemainder(square, mod);
+            steps.push(`  reduce mod ${mod} → ${b}`);
+          } else {
+            steps.push(`exponent became 0, stop squaring`);
+          }
+        }
+        steps.push(`✅ final: a^(p-1) mod p = ${result}`);
+        return { result, steps };
+      }
+
+      // ---------- RENDER LOGIC ----------
+      const mainEl = document.getElementById('mainPanel');
+      const navEuclid = document.getElementById('navEuclid');
+      const navFermat = document.getElementById('navFermat');
+
+      let currentView = 'euclid';
+
+      function setActive(active) {
+        navEuclid.classList.toggle('active', active === 'euclid');
+        navFermat.classList.toggle('active', active === 'fermat');
+      }
+
+      // ---------- EUCLID PAGE ----------
+      function renderEuclid() {
+        currentView = 'euclid';
+        setActive('euclid');
+        mainEl.innerHTML = `
+          <div class="card">
+            <h1>Euclidean algorithm</h1>
+            <div class="sub">intermediate division steps · manual subtraction (no modulo)</div>
+
+            <div class="input-panel">
+              <div class="input-group">
+                <div class="field">
+                  <label>integer a</label>
+                  <input id="euclidA" type="number" value="48" step="1">
+                </div>
+                <div class="field">
+                  <label>integer b</label>
+                  <input id="euclidB" type="number" value="18" step="1">
+                </div>
+                <button class="btn-run" id="runEuclidBtn">Calculate GCD</button>
+              </div>
+            </div>
+
+            <div class="result-header">📋 intermediate divisions</div>
+            <div id="euclidStepsArea" class="steps-container">
+              <div class="step-line"> <strong>step 1</strong> 48 = 2·18 + 12 </div>
+              <div class="step-line"> <strong>step 2</strong> 18 = 1·12 + 6 </div>
+              <div class="step-line"> <strong>step 3</strong> 12 = 2·6 + 0 </div>
+            </div>
+
+            <div class="final-gcd-box" id="euclidGcdDisplay">gcd = 6</div>
+            <div class="info-note">
+              <strong>📌 pure logic:</strong> each remainder obtained by repeated subtraction (while loop). No built‑in <code>%</code> or <code>Math</code>.
+            </div>
+          </div>
+        `;
+
+        const btn = document.getElementById('runEuclidBtn');
+        const inputA = document.getElementById('euclidA');
+        const inputB = document.getElementById('euclidB');
+        const stepsDiv = document.getElementById('euclidStepsArea');
+        const gcdSpan = document.getElementById('euclidGcdDisplay');
+
+        function updateEuclid() {
+          let a = parseInt(inputA.value, 10);
+          let b = parseInt(inputB.value, 10);
+          if (isNaN(a)) a = 0;
+          if (isNaN(b)) b = 0;
+
+          const { gcd, steps } = euclidWithSteps(a, b);
+
+          if (steps.length === 0) {
+            stepsDiv.innerHTML = `<div class="step-line">no steps (both zero?)</div>`;
+            gcdSpan.innerText = `gcd = ${gcd}`;
+            return;
+          }
+
+          let stepsHtml = '';
+          steps.forEach(s => {
+            if (s.description) {
+              stepsHtml += `<div class="step-line"><strong>step ${s.step || '?'}</strong> ${s.description}</div>`;
+            } else {
+              // fallback for zero case
+              stepsHtml += `<div class="step-line">${s.description}</div>`;
+            }
+          });
+          stepsDiv.innerHTML = stepsHtml;
+          gcdSpan.innerText = `gcd = ${gcd}`;
+        }
+
+        btn.addEventListener('click', updateEuclid);
+        updateEuclid(); // initial with 48,18
+      }
+
+      // ---------- FERMAT PAGE ----------
+      function renderFermat() {
+        currentView = 'fermat';
+        setActive('fermat');
+        mainEl.innerHTML = `
+          <div class="card">
+            <h1>Fermat · little theorem</h1>
+            <div class="sub">a<sup>p-1</sup> ≡ 1 (mod p)  — stepwise modular exponentiation</div>
+
+            <div class="input-panel">
+              <div class="input-group">
+                <div class="field">
+                  <label>base a</label>
+                  <input id="fermatA" type="number" value="3" step="1">
+                </div>
+                <div class="field">
+                  <label>prime p</label>
+                  <input id="fermatP" type="number" value="7" step="1">
+                </div>
+                <button class="btn-run" id="runFermatBtn">show steps</button>
+              </div>
+            </div>
+
+            <div class="result-header">🔍 modular exponentiation steps (a<sup>p-1</sup> mod p)</div>
+            <div id="fermatStepsArea" class="steps-container" style="background:#f5f2e8;">
+              <!-- dynamic steps inserted here -->
+              <div class="fermat-step">initial: base = 3, reduce base mod 7 → 3</div>
+              <div class="fermat-step">exponent 6 is even → keep result = 1</div>
+              <div class="fermat-step">square base: 3² = 9 → reduce mod 7 → 2</div>
+              <div class="fermat-step">...</div>
+            </div>
+
+            <div class="final-gcd-box" id="fermatResultDisplay" style="background:#2d4b6b;">a^(p-1) mod p = 1</div>
+            <div class="info-note">
+              <strong>⚡ purely manual:</strong> modular multiplication uses addition loops, remainder uses subtraction. No <code>Math.pow</code>, no <code>%</code>, no built‑in exponentiation.
+            </div>
+          </div>
+        `;
+
+        const btn = document.getElementById('runFermatBtn');
+        const aInput = document.getElementById('fermatA');
+        const pInput = document.getElementById('fermatP');
+        const stepsDiv = document.getElementById('fermatStepsArea');
+        const resultSpan = document.getElementById('fermatResultDisplay');
+
+        function updateFermat() {
+          let a = parseInt(aInput.value, 10);
+          let p = parseInt(pInput.value, 10);
+          if (isNaN(a)) a = 0;
+          if (isNaN(p) || p < 2) p = 2;   // ensure mod >=2
+
+          const exp = p - 1;
+          const { result, steps } = fermatStepsManual(a, exp, p);
+
+          // build html steps
+          let stepsHtml = '';
+          steps.forEach(line => {
+            stepsHtml += `<div class="fermat-step">${line}</div>`;
+          });
+          stepsDiv.innerHTML = stepsHtml;
+          resultSpan.innerText = `a^(p-1) mod p = ${result}`;
+        }
+
+        btn.addEventListener('click', updateFermat);
+        updateFermat(); // initial with 3,7
+      }
+
+      // navigation
+      navEuclid.addEventListener('click', () => {
+        if (currentView !== 'euclid') renderEuclid();
+      });
+      navFermat.addEventListener('click', () => {
+        if (currentView !== 'fermat') renderFermat();
+      });
+
+      // initial render
+      renderEuclid();
+    })();
+  </script>
+</body>
+</html>
