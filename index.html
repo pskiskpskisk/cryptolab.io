@@ -230,31 +230,31 @@
         const exercises = [
             {
                 id: 1,
-                number: "Ex1",
+                number: "Ex1-B",
                 name: "Classical Ciphers",
-                description: "Playfair, Affine, Vigenere Ciphers",
-                tags: [],
+                description: "Project details ",
+                tags: ["Playfair", "Affine", "Vigenere Ciphers"],
                 icon: "fa-code"
 				
             },
             {
                 id: 2,
-                number: "Ex2",
-                name: "Advance Encryption Standard (AES)",
-                description: "To create a webpage demonstating AES",
-                tags: ["Coming Soon"],
-                icon: "fa-code"
+                number: "Ex1-B",
+                name: "Number Theory",
+                description: "Project details ",
+                tags: ["Euclidean Algorithm", "Fermant's Little Theorem"],
+                icon: "fa-calculator"
             },
             {
                 id: 3,
-				number: "Ex3",
-				name: "Coming Soon",
-				description: "Project details will be updated soon.",
-				tags: ["Coming Soon"],
-				icon: "fa-clock"
+				number: "Ex2",
+				name: "Modern Encryption Algorithm",
+				description: "Project details ",
+				tags: ["AES","DES"],
+				icon: "fa-calculator"
 			},
 			{
-				id: 4,
+				id: 4, 
 				number: "Ex4",
 				name: "Coming Soon",
 				description: "Project details will be updated soon.",
@@ -331,7 +331,7 @@
             if (exercise) {
                 //alert(`Loading ${exercise.number}: ${exercise.name}\n\n${exercise.description}\n\nTags: ${exercise.tags.join(', ')}`);
                 // In a real application, you would navigate to the exercise page
-                 window.location.href = `ex${1}/exercise${id}.html`;
+                 window.location.href = `ex${id}/exercise${id}.html`;
             }
         }
     </script>
