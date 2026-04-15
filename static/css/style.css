@@ -1,0 +1,440 @@
+/* =========================================
+   1. VARIABLES & RESET
+   ========================================= */
+:root {
+    /* Brand Colors - Matching Home Page */
+    --primary: #4f46e5;       /* Indigo */
+    --primary-dark: #4338ca;  /* Deep Indigo */
+    --secondary: #0ea5e9;     /* Sky Blue */
+    
+    /* Functional Colors */
+    --danger: #ef476f;        /* Red */
+    --success: #10b981;       /* Emerald */
+    --warning: #f59e0b;       /* Amber */
+
+    /* UI Colors */
+    --sidebar-bg: #1e293b;    /* Dark Slate (Matches Home Hero) */
+    --light-bg: #f8fafc;      /* Very Light Gray */
+    --card-bg: #ffffff;       /* Pure White */
+    --border-color: #e2e8f0;  /* Light Border */
+    
+    /* Text Colors */
+    --text-main: #334155;     /* Dark Slate Text */
+    --text-light: #64748b;    /* Muted Text */
+    --text-inv: #ffffff;      /* White Text */
+
+    /* Effects */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --radius: 12px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--light-bg);
+    color: var(--text-main);
+    line-height: 1.6;
+}
+
+/* =========================================
+   2. SIDEBAR NAVIGATION
+   ========================================= */
+.sidebar {
+    width: 260px;
+    background-color: var(--sidebar-bg);
+    color: var(--text-inv);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    z-index: 100;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.15); /* Stronger shadow like Home Hero */
+}
+
+.sidebar .logo {
+    font-size: 24px;
+    font-weight: 800;
+    padding: 30px;
+    text-align: center;
+    letter-spacing: -0.5px;
+    /* Gradient Text Matching Home Hero Title */
+    background: linear-gradient(135deg, #fff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar nav {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.sidebar ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sidebar ul li a {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    color: #cbd5e1; /* Lighter gray for inactive */
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    font-size: 14px;
+    border: 1px solid transparent;
+}
+
+.sidebar ul li a:hover {
+    background-color: rgba(255,255,255,0.05);
+    color: var(--text-inv);
+    transform: translateX(3px);
+}
+
+.sidebar ul li a.active {
+    background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+    color: var(--text-inv);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* =========================================
+   3. MAIN CONTENT LAYOUT
+   ========================================= */
+.content {
+    margin-left: 260px;
+    padding: 40px;
+    width: calc(100% - 260px);
+    max-width: 1200px;
+    margin-right: auto; 
+}
+
+/* Header inside tools */
+header {
+    margin-bottom: 30px;
+}
+
+header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--sidebar-bg);
+    letter-spacing: -0.5px;
+}
+
+/* =========================================
+   4. DASHBOARD CARDS (Exercise Lists)
+   ========================================= */
+/* Container */
+.vertical-menu-container {
+    max-width: 800px;
+    margin: 0 auto;
+    display: grid;
+    gap: 15px;
+}
+
+/* The horizontal cards in dashboards */
+.action-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--card-bg);
+    padding: 20px 25px;
+    border-radius: 12px; /* Smoother corners */
+    text-decoration: none;
+    color: var(--text-main);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background-color: var(--border-color); /* Default gray stripe */
+    transition: width 0.2s;
+}
+
+/* Specific Border Colors */
+.action-card.cipher::before   { background-color: var(--primary); }
+.action-card.math::before     { background-color: var(--success); }
+.action-card.analysis::before { background-color: var(--warning); }
+
+.action-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: #cbd5e1;
+}
+
+.action-card h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--sidebar-bg);
+}
+
+.action-card p {
+    margin: 4px 0 0 0;
+    font-size: 13px;
+    color: var(--text-light);
+}
+
+.action-card .arrow {
+    font-size: 18px;
+    color: #cbd5e1;
+    transition: 0.2s;
+}
+
+.action-card:hover .arrow {
+    color: var(--primary);
+    transform: translateX(5px);
+}
+
+/* =========================================
+   5. FORMS & INPUTS
+   ========================================= */
+section.form-section {
+    background: var(--card-bg);
+    padding: 35px;
+    border-radius: 16px; /* Matches Home Cards */
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+form {
+    display: grid;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-light);
+    letter-spacing: 0.5px;
+}
+
+input[type="text"], 
+input[type="number"], 
+textarea {
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: #fcfcfc;
+    font-size: 14px;
+    transition: all 0.2s;
+    font-family: "Consolas", monospace; /* Code font for inputs */
+    color: var(--text-main);
+    width: 100%;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Buttons */
+button {
+    border: none;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.2s;
+    color: #fff;
+    background-color: var(--primary);
+    flex: 1;
+}
+
+button:hover {
+    filter: brightness(110%);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* =========================================
+   6. OUTPUTS & ALERTS
+   ========================================= */
+.error-message {
+    background-color: #fef2f2;
+    color: var(--danger);
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #fecaca;
+    margin-top: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.result-container {
+    margin-top: 30px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.result-container h3 {
+    font-size: 13px;
+    color: var(--text-light);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+}
+
+.output-box {
+    background-color: var(--sidebar-bg); /* Dark Terminal Look */
+    color: var(--success);
+    padding: 20px;
+    border-radius: 8px;
+    font-family: "Consolas", monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 400px;
+    overflow-y: auto;
+    border-left: 4px solid var(--success);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================
+   7. MATRIX & VISUALIZATION (Ex 1 & 2)
+   ========================================= */
+.matrix-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-generate {
+    background-color: var(--sidebar-bg);
+    flex: 0 0 auto;
+}
+
+.matrix-grid-container {
+    display: grid;
+    gap: 8px;
+    margin-top: 5px;
+    max-width: 400px;
+    background: var(--light-bg);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px dashed var(--border-color);
+}
+
+.matrix-cell {
+    text-align: center;
+    padding: 8px !important;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* Round Box (Used in DES/AES Logs) */
+.round-box {
+    border: 1px solid var(--border-color);
+    margin: 10px 0;
+    border-radius: 8px;
+    background: #fff;
+    overflow: hidden;
+}
+
+.round-header {
+    background: #f8fafc;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-main);
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s;
+}
+
+.round-header:hover { background: #f1f5f9; }
+
+.round-content { padding: 15px; }
+.round-content.hidden { display: none; }
+
+.step-row {
+    display: flex;
+    margin-bottom: 5px;
+    font-family: "Consolas", monospace;
+    font-size: 12px;
+    border-bottom: 1px dashed #f1f5f9;
+    padding-bottom: 2px;
+}
+
+.step-label { width: 120px; font-weight: 700; color: #64748b; flex-shrink: 0; }
+.step-value { color: var(--text-main); word-break: break-all; }
+
+/* AES Matrix */
+.matrix-display {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    width: 140px;
+    gap: 1px;
+    margin: 5px 0 15px 120px;
+    background: #cbd5e1;
+    padding: 1px;
+}
+.matrix-display .matrix-cell {
+    background: #fff;
+    padding: 3px 0 !important;
+    font-size: 11px;
+    font-family: "Consolas", monospace;
+    color: #334155;
+}
+
+.block-separator { border: 0; border-top: 2px solid var(--border-color); margin: 25px 0 15px 0; }
+.block-title { font-size: 14px; font-weight: 800; color: var(--primary); text-transform: uppercase; }
+
+/* =========================================
+   8. RESPONSIVE
+   ========================================= */
+@media (max-width: 768px) {
+    .sidebar { width: 100%; height: auto; position: relative; }
+    .content { margin-left: 0; width: 100%; padding: 20px; }
+}

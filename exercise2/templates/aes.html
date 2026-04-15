@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AES Encryption</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script>
+    function toggleRound(header) {
+        header.classList.toggle('collapsed');
+        var content = header.nextElementSibling;
+        content.classList.toggle('hidden');
+    }
+  </script>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">CRYPTO LAB</div>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('root') }}">← Back to Home</a></li>
+        <li style="margin-top: 20px; font-weight: bold; color: #aaa; font-size: 0.9rem;">Exercise 2 - Modern Encryption:</li>
+        <li><a href="{{ url_for('ex2.aes_route') }}" style="color: #fff; font-weight: bold;">AES Encryption</a></li>
+        <li><a href="{{ url_for('ex2.des_route') }}">DES Encryption</a></li>
+      </ul>
+    </nav>
+  </aside>
+  <main class="content">
+    <header><h1>AES-128 Encryption</h1></header>
+    <section class="form-section">
+      <form method="POST">
+        <div class="form-group">
+            <label>Key (32 Hex Characters)</label>
+            <input type="text" name="key" value="{{ request.form.get('key', '') }}" required>
+        </div>
+        <div class="form-group">
+            <label>Mode</label>
+            <div style="display:flex; gap:20px;">
+                <!-- UPDATED RADIO BUTTONS -->
+                <label>
+                    <input type="radio" name="mode" value="ECB" {% if mode == 'ECB' %}checked{% endif %}> ECB
+                </label>
+                <label>
+                    <input type="radio" name="mode" value="CBC" {% if mode == 'CBC' %}checked{% endif %}> CBC
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Input Text</label>
+            <textarea name="text" required>{{ request.form.get('text', '') }}</textarea>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" name="encrypt" style="background: var(--primary);">Encrypt</button>
+            <button type="submit" name="decrypt" style="background: var(--success);">Decrypt</button>
+        </div>
+      </form>
+
+      {% if error %}<div class="error-message">{{ error }}</div>{% endif %}
+
+      {% if result %}
+      <div class="result-container">
+        <h3>Final Result ({{ mode_label }})</h3>
+        <div class="output-box">{{ result }}</div>
+
+        <!-- KEY EXPANSION -->
+        {% if key_logs %}
+        <div style="margin-top: 40px;">
+            <h2>Key Expansion Details</h2>
+            <div class="round-box">
+                <div class="round-header collapsed" onclick="toggleRound(this)">
+                    Show Key Generation Steps <span class="toggle-icon"></span>
+                </div>
+                <div class="round-content hidden">
+                    {% for item in key_logs %}
+                        <div class="step-row">
+                            <span class="step-label">Round Key {{ item.round }}:</span>
+                            <span class="step-value">{{ item.key }}</span>
+                        </div>
+                        
+                        {% if item.details %}
+                        <div style="margin: 8px 0 15px 40px; padding: 10px; background: #f8fafc; border-left: 3px solid var(--secondary); font-size: 13px;">
+                            <div style="color: var(--primary-dark); font-weight: bold; margin-bottom: 5px;">Word {{ item.details.word_idx }} Calculation:</div>
+                            <div>Before: {{ item.details.before }}</div>
+                            <div>RotWord: {{ item.details.rot }}</div>
+                            <div>SubWord: {{ item.details.sub }}</div>
+                            <div>XOR Rcon ({{ item.details.rcon }}): {{ item.details.after_xor }}</div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ROUND VISUALIZATION -->
+        {% if logs %}
+        <div style="margin-top: 40px;">
+            <h2>Round Visualization</h2>
+            {% for block in logs %}
+            <hr class="block-separator">
+            <div class="block-title">Block {{ block.block_id }}</div>
+            {% for step in block.steps %}
+                {% if step.type == 'init' %}
+                    <div class="step-row"><span class="step-label">Input State:</span><span class="step-value">{{ step.hex }}</span></div>
+                    <div class="matrix-display">{% for byte in step.matrix %}<div class="matrix-cell">{{ byte }}</div>{% endfor %}</div>
+                {% elif step.type == 'round_0' %}
+                    <div class="step-row"><span class="step-label">Round Key 0:</span><span class="step-value">{{ step.key }}</span></div>
+                    <div class="step-row"><span class="step-label">After AddKey:</span><span class="step-value">{{ step.hex }}</span></div>
+                    <div class="matrix-display">{% for byte in step.matrix %}<div class="matrix-cell">{{ byte }}</div>{% endfor %}</div>
+                {% elif step.round %}
+                    <div class="round-box">
+                        <div class="round-header collapsed" onclick="toggleRound(this)">
+                            Round {{ step.round }} <span class="toggle-icon"></span>
+                        </div>
+                        <div class="round-content hidden">
+                            {% for op in step.ops %}
+                                <div class="step-row"><span class="step-label">{{ op.label }}:</span><span class="step-value">{{ op.hex }}</span></div>
+                                {% if op.key %}<div class="step-row"><span class="step-label">Round Key:</span><span class="step-value">{{ op.key }}</span></div>{% endif %}
+                                <div class="matrix-display">{% for byte in op.matrix %}<div class="matrix-cell">{{ byte }}</div>{% endfor %}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>

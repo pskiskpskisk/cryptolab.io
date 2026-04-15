@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RSA Encryption - Exercise 3</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .step-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .key-display {
+            display: grid; 
+            grid-template-columns: 1fr 1fr 1fr; 
+            gap: 10px; 
+            background: rgba(67, 97, 238, 0.1); 
+            padding: 15px; 
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .key-field label { display: block; font-size: 11px; margin-bottom: 4px; }
+        .key-field input { background: #fff; font-weight: bold; color: var(--primary-dark); }
+    </style>
+</head>
+<body>
+    
+    <aside class="sidebar">
+        <div class="logo">CRYPTO LAB</div>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('root') }}">← Back to Home</a></li>
+                <li style="margin-top: 20px; font-weight: bold; color: #aaa; font-size: 0.9rem;">Exercise 3 - Key Exchange & RSA:</li>
+                <li><a href="{{ url_for('ex3.rsa_route') }}" style="color: #fff; font-weight: bold;">RSA Cryptosystem</a></li>
+                <li><a href="{{ url_for('ex3.dh_route') }}">Diffie-Hellman</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="content">
+        <header>
+            <h1>RSA Algorithm</h1>
+
+        </header>
+
+        <!-- ERROR MESSAGE -->
+        {% if error %}
+        <div class="error-message" style="margin-bottom: 20px;">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <!-- STEP 1: KEY GENERATION -->
+        <section class="form-section" style="margin-bottom: 30px;">
+            <h2 style="font-size: 18px; margin-bottom: 15px; color: var(--primary);">Step 1: Generate Keys</h2>
+            <form method="POST">
+                <input type="hidden" name="action" value="generate">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Prime P</label>
+                        <input type="number" name="p" value="{{ p if p else '' }}" placeholder="e.g. 11" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Prime Q</label>
+                        <input type="number" name="q" value="{{ q if q else '' }}" placeholder="e.g. 17" required>
+                    </div>
+                </div>
+                <button type="submit" style="background-color: var(--secondary); color: #000;">Generate Keys</button>
+            </form>
+
+            <!-- Key Generation Logs -->
+            {% if key_steps %}
+            <div class="result-container">
+                <h3>Key Generation Log</h3>
+                <div class="output-box" style="max-height: 150px;">
+{% for step in key_steps %}
+{{ step }}
+{% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- STEP 2: ENCRYPTION (Only shown if keys exist) -->
+        {% if keys_generated %}
+        <section class="form-section">
+            <h2 style="font-size: 18px; margin-bottom: 15px; color: var(--primary);">Step 2: Encryption</h2>
+            
+            <form method="POST">
+                <input type="hidden" name="action" value="encrypt">
+                
+                <!-- Hidden fields to keep p and q filled in the top form when page reloads -->
+                <input type="hidden" name="p" value="{{ p }}">
+                <input type="hidden" name="q" value="{{ q }}">
+
+                <div class="key-display">
+                    <div class="key-field">
+                        <label>Modulus (N)</label>
+                        <input type="text" name="n" value="{{ n }}" readonly>
+                    </div>
+                    <div class="key-field">
+                        <label>Public Exp (E)</label>
+                        <input type="text" name="e" value="{{ e }}" readonly>
+                    </div>
+                    <div class="key-field">
+                        <label>Private Exp (D)</label>
+                        <input type="text" name="d" value="{{ d }}" readonly>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Message to Encrypt</label>
+                    <input type="text" name="message" value="{{ message if message else '' }}" placeholder="Enter text..." required>
+                </div>
+
+                <button type="submit">Encrypt & Decrypt</button>
+            </form>
+
+            {% if ciphertext %}
+            <div class="result-container">
+                
+                <h3>Encryption Process</h3>
+                <div class="output-box" style="margin-bottom: 15px;">
+{% for step in enc_steps %}
+{{ step }}
+{% endfor %}
+
+Result: {{ ciphertext }}
+                </div>
+
+                <h3>Decryption Verification</h3>
+                <div class="output-box">
+{% for step in dec_steps %}
+{{ step }}
+{% endfor %}
+
+Result: "{{ decrypted_msg }}"
+                </div>
+
+            </div>
+            {% endif %}
+        </section>
+        {% endif %}
+
+    </main>
+</body>
+</html>

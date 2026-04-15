@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DES Encryption</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .sbox-grid {
+        display: grid;
+        grid-template-columns: repeat(17, 1fr);
+        font-size: 10px;
+        text-align: center;
+        border: 1px solid #cbd5e1;
+        margin-bottom: 15px;
+    }
+    .sbox-cell {
+        padding: 3px;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+    }
+    .sbox-header {
+        background: #f1f5f9;
+        font-weight: bold;
+        color: #475569;
+    }
+  </style>
+  <script>
+    function toggleRound(header) {
+        header.classList.toggle('collapsed');
+        var content = header.nextElementSibling;
+        content.classList.toggle('hidden');
+    }
+  </script>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">CRYPTO LAB</div>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('root') }}">← Back to Home</a></li>
+        <li style="margin-top: 20px; font-weight: bold; color: #aaa; font-size: 0.9rem;">Exercise 2 - Modern Encryption:</li>
+        <li><a href="{{ url_for('ex2.aes_route') }}">AES Encryption</a></li>
+        <li><a href="{{ url_for('ex2.des_route') }}" style="color: #fff; font-weight: bold;">DES Encryption</a></li>
+      </ul>
+    </nav>
+  </aside>
+  <main class="content">
+    <header><h1>DES Encryption</h1></header>
+    <section class="form-section">
+      <form method="POST">
+        <div class="form-group">
+            <label>Key (16 Hex Characters)</label>
+            <input type="text" name="key" value="{{ request.form.get('key', '') }}" required>
+        </div>
+        <div class="form-group">
+            <label>Mode</label>
+            <div style="display:flex; gap:20px;">
+                <label><input type="radio" name="mode" value="ECB" {% if mode == 'ECB' %}checked{% endif %}> ECB</label>
+                <label><input type="radio" name="mode" value="CBC" {% if mode == 'CBC' %}checked{% endif %}> CBC</label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Input Text</label>
+            <textarea name="text" required>{{ request.form.get('text', '') }}</textarea>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" name="encrypt" style="background: var(--primary);">Encrypt</button>
+            <button type="submit" name="decrypt" style="background: var(--success);">Decrypt</button>
+        </div>
+      </form>
+
+      {% if error %}<div class="error-message">{{ error }}</div>{% endif %}
+
+      {% if result %}
+      <div class="result-container">
+        <h3>Final Result ({{ mode_label }})</h3>
+        <div class="output-box">{{ result }}</div>
+
+        <!-- REFERENCE S-BOXES -->
+        {% if s_boxes %}
+        <div style="margin-top: 40px;">
+            <h2>Reference: DES S-Boxes (4x16)</h2>
+            <div class="round-box">
+                <div class="round-header collapsed" onclick="toggleRound(this)">
+                    Show S-Box Tables <span class="toggle-icon"></span>
+                </div>
+                <div class="round-content hidden">
+                    {% for box in s_boxes %}
+                    <strong style="display:block; margin: 10px 0 5px;">S-Box {{ loop.index }}</strong>
+                    <div class="sbox-grid">
+                        <div class="sbox-cell sbox-header">R\C</div>
+                        {% for i in range(16) %}<div class="sbox-cell sbox-header">{{ i }}</div>{% endfor %}
+                        {% for row_data in box %}
+                            <div class="sbox-cell sbox-header">{{ loop.index0 }}</div>
+                            {% for val in row_data %}
+                                <div class="sbox-cell">{{ val }}</div>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- KEY SCHEDULE GENERATION -->
+        {% if key_logs %}
+        <div style="margin-top: 20px;">
+            <h2>Key Schedule Generation</h2>
+            <div class="round-box">
+                <div class="round-header collapsed" onclick="toggleRound(this)">
+                    Show Subkey Generation <span class="toggle-icon"></span>
+                </div>
+                <div class="round-content hidden">
+                    {% for item in key_logs %}
+                        
+                        <!-- PC-1 INITIAL STEP -->
+                        {% if item.type == 'PC1' %}
+                        <div style="padding-bottom:15px; margin-bottom:15px; border-bottom:2px solid #cbd5e1;">
+                            <div class="step-row"><span class="step-label" style="color:var(--primary);"><strong>Initialization</strong></span></div>
+                            <div class="step-row"><span class="step-label">After PC-1 Permute:</span><span class="step-value" style="font-size:11px; word-break:break-all;">{{ item.pc1_out }}</span></div>
+                            <div class="step-row"><span class="step-label">C0 (28-bit):</span><span class="step-value" style="font-size:11px;">{{ item.C0 }}</span></div>
+                            <div class="step-row"><span class="step-label">D0 (28-bit):</span><span class="step-value" style="font-size:11px;">{{ item.D0 }}</span></div>
+                        </div>
+
+                        <!-- ROUNDS -->
+                        {% elif item.type == 'Round' %}
+                        <div style="margin-bottom: 15px; border-bottom: 1px dashed #eee; padding-bottom: 10px;">
+                            <div class="step-row"><span class="step-label" style="color:var(--primary);">Round {{ item.round }}:</span></div>
+                            <div class="step-row"><span class="step-label">Left Circ. Shift:</span><span class="step-value">{{ item.shift }}</span></div>
+                            <div class="step-row"><span class="step-label">C (Shifted):</span><span class="step-value" style="font-size:11px;">{{ item.C }}</span></div>
+                            <div class="step-row"><span class="step-label">D (Shifted):</span><span class="step-value" style="font-size:11px;">{{ item.D }}</span></div>
+                            <div class="step-row"><span class="step-label">PC-2 (Subkey):</span><span class="step-value" style="font-weight:bold;">{{ item.pc2_out }}</span></div>
+                        </div>
+                        {% endif %}
+
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ROUND VISUALIZATION -->
+        {% if logs %}
+        <div style="margin-top: 40px;">
+            <h2>Round Visualization</h2>
+            {% for block in logs %}
+            <hr class="block-separator">
+            <div class="block-title">Block {{ block.block_id }}</div>
+            {% for step in block.steps %}
+                {% if step.type == 'init' %}
+                    <div class="step-row"><span class="step-label">L0:</span><span class="step-value">{{ step.L }}</span></div>
+                    <div class="step-row"><span class="step-label">R0:</span><span class="step-value">{{ step.R }}</span></div>
+                {% elif step.type == 'round' %}
+                    <div class="round-box">
+                        <div class="round-header collapsed" onclick="toggleRound(this)">
+                            Round {{ step.round }} <span class="toggle-icon"></span>
+                        </div>
+                        <div class="round-content hidden">
+                            <div class="step-row"><span class="step-label">Subkey:</span><span class="step-value">{{ step.key }}</span></div>
+                            <div class="step-row"><span class="step-label">E(R) Expand:</span><span class="step-value">{{ step.expansion }}</span></div>
+                            <div class="step-row"><span class="step-label">E(R) ⊕ K:</span><span class="step-value">{{ step.xor_k }}</span></div>
+                            <!-- S-Box Details Removed Here -->
+                            <div class="step-row"><span class="step-label">S-Box Out:</span><span class="step-value">{{ step.sbox_out }}</span></div>
+                            <div class="step-row"><span class="step-label">P Permute:</span><span class="step-value">{{ step.p_out }}</span></div>
+                            <div style="margin-top: 10px; border-top: 1px dashed #eee; padding-top: 5px;">
+                                <div class="step-row"><span class="step-label">L{{ step.round }}:</span><span class="step-value">{{ step.L }}</span></div>
+                                <div class="step-row"><span class="step-label">R{{ step.round }}:</span><span class="step-value">{{ step.R }}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+            {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>

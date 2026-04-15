@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fermat's Little Theorem - Ex1-B</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .algorithm-box {
+      background: #f5f7fa;
+      border-left: 4px solid #4f6df5;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 6px;
+    }
+    .algorithm-title {
+      font-weight: bold;
+      color: #4f6df5;
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+    }
+    .result-row {
+      display: flex;
+      gap: 20px;
+      margin: 12px 0;
+      font-size: 0.95rem;
+    }
+    .result-label {
+      font-weight: 600;
+      color: #333;
+      min-width: 200px;
+    }
+    .result-value {
+      color: #666;
+      font-family: monospace;
+      background: #fff;
+      padding: 6px 10px;
+      border-radius: 4px;
+      flex: 1;
+    }
+    .prime-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+    .prime-yes {
+      background: #d4edda;
+      color: #155724;
+    }
+    .prime-no {
+      background: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">CRYPTO LAB</div>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('root') }}">← Back to Home</a></li>
+        <li style="margin-top: 20px; font-weight: bold; color: #aaa; font-size: 0.9rem;">Exercise 1-B (Number Theory):</li>
+        <li><a href="{{ url_for('ex1.extended_euclidean_route') }}">Extended Euclidean</a></li>
+        <li><a href="{{ url_for('ex1.fermat_theorem_route') }}" style="color: #fff; font-weight: bold;">Fermat's Little Theorem</a></li>
+      </ul>
+    </nav>
+  </aside>
+  <main class="content">
+    <header><h1>Ex1-B.2: Fermat's Little Theorem & Primality Testing</h1></header>
+    <section class="form-section">
+      <form method="POST">
+        <div class="form-group"><label>Integer n (to test for primality)</label><input type="number" name="n" value="{{ request.form.get('n','') }}" required></div>
+        <div class="form-group"><label>Integer a (witness, default 2)</label><input type="number" name="a" value="{{ request.form.get('a','2') }}" required></div>
+        <div style="display:flex; gap:10px;"><button type="submit">Test Primality</button></div>
+      </form>
+
+      {% if error %}<div class="error-message">{{ error }}</div>{% endif %}
+      {% if result %}
+        <div class="result-container">
+          <h3>Primality Test Results for n = {{ result.n }}</h3>
+          
+          <!-- Fermat's Little Theorem -->
+          <div class="algorithm-box">
+            <div class="algorithm-title">Fermat's Little Theorem</div>
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 12px;">
+              <strong>Theorem:</strong> If p is prime and gcd(a, p) = 1, then <strong>a^(p-1) ≡ 1 (mod p)</strong>
+            </p>
+            <div class="result-row">
+              <span class="result-label">a^(n-1) mod n:</span>
+              <span class="result-value">{{ result.a }}^{{ result.n - 1 }} mod {{ result.n }} = {{ result.fermat_result if result.fermat_result is not none else 'N/A' }}</span>
+            </div>
+            {% if result.fermat_holds is not none %}
+            <div style="background: #e8f4f8; padding: 10px; border-radius: 4px; margin: 10px 0; font-size: 0.9rem;">
+              {% if result.fermat_holds %}
+                ✓ Fermat's condition holds: {{ result.a }}^{{ result.n - 1 }} ≡ 1 (mod {{ result.n }})
+              {% else %}
+                ✗ Fermat's condition fails: {{ result.a }}^{{ result.n - 1 }} ≢ 1 (mod {{ result.n }}) → {{ result.n }} is definitely composite
+              {% endif %}
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Miller-Rabin Primality Test -->
+          <div class="algorithm-box">
+            <div class="algorithm-title">Miller-Rabin Probabilistic Primality Test</div>
+            <p style="font-size: 0.9rem; color: #666; margin-bottom: 12px;">
+              A more reliable primality test that detects Carmichael numbers and uses multiple witness rounds for high confidence.
+            </p>
+            <div class="result-row">
+              <span class="result-label">Is {{ result.n }} prime?</span>
+              <span class="result-value">
+                {% if result.is_prime %}
+                  <span class="prime-badge prime-yes">✓ PRIME</span>
+                {% else %}
+                  <span class="prime-badge prime-no">✗ COMPOSITE</span>
+                {% endif %}
+              </span>
+            </div>
+            <p style="font-size: 0.85rem; color: #999; margin: 8px 0;">
+              {% if result.is_prime %}
+                Confidence: 99.7% (after 5 independent witness rounds)
+              {% else %}
+                Definitively composite
+              {% endif %}
+            </p>
+          </div>
+
+          <!-- Example: Carmichael Numbers -->
+          <div class="algorithm-box">
+            <div class="algorithm-title">Why Miller-Rabin?</div>
+            <p style="font-size: 0.9rem; color: #666;">
+              Some composite numbers (Carmichael numbers like 561, 1105) pass Fermat's test for <em>all</em> values of a. Miller-Rabin detects these by checking additional conditions derived from prime factorizations.
+            </p>
+          </div>
+        </div>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>

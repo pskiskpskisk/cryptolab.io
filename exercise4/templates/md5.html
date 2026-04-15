@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MD5 Hash Generator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">CRYPTO LAB</div>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('root') }}">← Back to Home</a></li>
+        <li style="margin-top: 20px; font-weight: bold; color: #aaa; font-size: 0.9rem;">Exercise 4 - Hashing:</li>
+        <li><a href="{{ url_for('ex4.md5_route') }}" style="color: #fff; font-weight: bold;">MD5 Hashing</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <header>
+      <h1>MD5 Hashing</h1>
+      <p style="color:var(--text-light);">Message Digest Algorithm 5</p>
+    </header>
+
+    <section class="form-section">
+      <form method="POST">
+        <div class="form-group">
+            <label>Input Text</label>
+            <textarea name="text" placeholder="Enter text to hash..." required style="height: 80px;">{{ input_text if input_text else '' }}</textarea>
+        </div>
+        
+        <button type="submit" style="background: var(--warning);">Generate Hash</button>
+      </form>
+
+      {% if error %}
+      <div class="error-message">Error: {{ error }}</div>
+      {% endif %}
+
+      {% if result %}
+      <div class="result-container">
+        <h3>MD5 Hash Output (Hex):</h3>
+        <div class="output-box" style="color: var(--warning);">{{ result }}</div>
+      </div>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>

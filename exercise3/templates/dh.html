@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Diffie-Hellman - Exercise 3</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .dh-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .user-box {
+            background: rgba(67, 97, 238, 0.05);
+            border: 1px solid rgba(67, 97, 238, 0.2);
+            padding: 20px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    
+    <aside class="sidebar">
+        <div class="logo">CRYPTO LAB</div>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('root') }}">← Back to Home</a></li>
+                <li style="margin-top: 20px; font-weight: bold; color: #aaa; font-size: 0.9rem;">Exercise 3 - Key Exchange & RSA:</li>
+                <li><a href="{{ url_for('ex3.rsa_route') }}">RSA Cryptosystem</a></li>
+                <li><a href="{{ url_for('ex3.dh_route') }}" style="color: #fff; font-weight: bold;">Diffie-Hellman</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="content">
+        <header>
+            <h1>Diffie-Hellman Key Exchange</h1>
+
+        </header>
+
+        <section class="form-section">
+            <form method="POST">
+                
+                <!-- PUBLIC PARAMETERS -->
+                <h3 style="font-size: 16px; color:var(--text-light); border-bottom:1px solid #e2e8f0; padding-bottom:5px;">Global Public Elements</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Prime Modulus (p)</label>
+                        <input type="number" name="p" value="{{ p if p else '' }}" placeholder="e.g. 23" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Primitive Root (g)</label>
+                        <input type="number" name="g" value="{{ g if g else '' }}" placeholder="e.g. 5" required>
+                    </div>
+                </div>
+
+                <!-- PRIVATE KEYS -->
+                <h3 style="font-size: 16px; color:var(--text-light); border-bottom:1px solid #e2e8f0; padding-bottom:5px; margin-top:10px;">Private Keys</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>A's Private Key (a)</label>
+                        <input type="number" name="a" value="{{ a if a else '' }}" placeholder="e.g. 6" required>
+                    </div>
+                    <div class="form-group">
+                        <label>B's Private Key (b)</label>
+                        <input type="number" name="b" value="{{ b if b else '' }}" placeholder="e.g. 15" required>
+                    </div>
+                </div>
+
+                <button type="submit">Exchange Keys</button>
+            </form>
+
+            {% if error %}
+            <div class="error-message">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            {% if result %}
+            <div class="result-container">
+                <div class="dh-grid">
+                    
+                    <!-- ALICE SIDE -->
+                    <div class="user-box">
+                        <h4 style="color: var(--primary-dark); margin-bottom: 10px;">A</h4>
+                        <p><strong>Private (a):</strong> {{ a }}</p>
+                        <p><strong>Calculates Public (A):</strong><br>
+                           A = g<sup>a</sup> mod p<br>
+                           A = {{ g }}<sup>{{ a }}</sup> mod {{ p }} = <span style="color:var(--primary); font-weight:bold;">{{ result.public_A }}</span>
+                        </p>
+                        <hr style="border:0; border-top:1px dashed #ccc; margin:10px 0;">
+                        <p><strong>Computes Secret:</strong><br>
+                           S = B<sup>a</sup> mod p<br>
+                           S = {{ result.public_B }}<sup>{{ a }}</sup> mod {{ p }} = <span style="background:var(--success); color:#fff; padding:2px 6px; border-radius:4px;">{{ result.secret_Alice }}</span>
+                        </p>
+                    </div>
+
+                    <!-- BOB SIDE -->
+                    <div class="user-box">
+                        <h4 style="color: var(--primary-dark); margin-bottom: 10px;">B</h4>
+                        <p><strong>Private (b):</strong> {{ b }}</p>
+                        <p><strong>Calculates Public (B):</strong><br>
+                           B = g<sup>b</sup> mod p<br>
+                           B = {{ g }}<sup>{{ b }}</sup> mod {{ p }} = <span style="color:var(--primary); font-weight:bold;">{{ result.public_B }}</span>
+                        </p>
+                        <hr style="border:0; border-top:1px dashed #ccc; margin:10px 0;">
+                        <p><strong>Computes Secret:</strong><br>
+                           S = A<sup>b</sup> mod p<br>
+                           S = {{ result.public_A }}<sup>{{ b }}</sup> mod {{ p }} = <span style="background:var(--success); color:#fff; padding:2px 6px; border-radius:4px;">{{ result.secret_Bob }}</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="output-box" style="margin-top: 20px; text-align: center;">
+                    {% if result.success %}
+                        <span style="color: var(--success); font-weight: bold; font-size: 18px;"> Key Exchange Successful! Shared Secret is {{ result.secret_Alice }}</span>
+                    {% else %}
+                        <span style="color: var(--danger); font-weight: bold;"> Key Exchange Failed. Secrets do not match.</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>
