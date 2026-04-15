@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cryptography Toolbox</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #4cc9f0;
+            --accent2: #f72585;
+            --accent3: #72efdd;
+            --text: #f1f1f1;
+            --text-secondary: #a9a9b8;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --nav-width: 250px;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+        }
+        
+        /* Navigation Sidebar */
+        .navbar {
+            width: var(--nav-width);
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            padding: 30px 0;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+        
+        .logo {
+            text-align: center;
+            padding: 0 20px 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            font-size: 1.8rem;
+            color: var(--accent);
+            margin-bottom: 5px;
+        }
+        
+        .logo p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .nav-links {
+            list-style: none;
+            padding: 0 20px;
+            flex-grow: 1;
+        }
+        
+        .nav-links li {
+            margin-bottom: 10px;
+        }
+        
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+        }
+        
+        .nav-links a.active {
+            background: linear-gradient(to right, rgba(76, 201, 240, 0.2), rgba(76, 201, 240, 0.05));
+            color: var(--accent);
+            border-left: 4px solid var(--accent);
+        }
+        
+        .nav-links i {
+            margin-right: 12px;
+            font-size: 1.2rem;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .nav-footer {
+            padding: 20px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            margin-left: var(--nav-width);
+            padding: 30px;
+            max-width: calc(100% - var(--nav-width));
+        }
+        
+        .cipher-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .cipher-section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .cipher-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .cipher-header h2 {
+            font-size: 2.2rem;
+            color: var(--accent);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .cipher-header h2 i {
+            margin-right: 15px;
+            background: rgba(76, 201, 240, 0.2);
+            padding: 12px;
+            border-radius: 10px;
+        }
+        
+        .cipher-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 800px;
+        }
+        
+        /* Card Layout */
+        .card-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        @media (max-width: 1100px) {
+            .card-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--accent3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-title i {
+            font-size: 1.3rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        
+        textarea, input, select {
+            width: 100%;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 1rem;
+            resize: vertical;
+            transition: all 0.3s;
+        }
+        
+        textarea:focus, input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(76, 201, 240, 0.2);
+        }
+        
+        textarea {
+            min-height: 120px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .encrypt-btn {
+            background: linear-gradient(to right, #4361ee, #3a0ca3);
+            color: white;
+        }
+        
+        .decrypt-btn {
+            background: linear-gradient(to right, #f72585, #b5179e);
+            color: white;
+        }
+        
+        .clear-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 14px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            border-left: 4px solid var(--accent2);
+        }
+        
+        .result h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: var(--accent3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .result-text {
+            font-family: monospace;
+            font-size: 1.2rem;
+            word-break: break-word;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            min-height: 60px;
+            white-space: pre-wrap;
+        }
+        
+        /* Explanation Card */
+        .explanation {
+            grid-column: 1 / -1;
+        }
+        
+        .explanation-content {
+            padding: 25px;
+        }
+        
+        h3 {
+            color: var(--accent3);
+            margin: 20px 0 10px;
+            font-size: 1.3rem;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .example {
+            background: rgba(76, 201, 240, 0.1);
+            border-left: 4px solid var(--accent);
+            padding: 15px;
+            border-radius: 0 10px 10px 0;
+            margin: 15px 0;
+        }
+        
+        .algorithm-box {
+            background: rgba(114, 239, 221, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 1px solid rgba(114, 239, 221, 0.2);
+        }
+        
+        .instructions {
+            background: rgba(114, 239, 221, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .highlight {
+            color: var(--accent3);
+            font-weight: bold;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .navbar {
+                width: 70px;
+                padding: 20px 0;
+            }
+            
+            .logo h1, .logo p, .nav-links span {
+                display: none;
+            }
+            
+            .logo {
+                padding: 0 10px 20px;
+            }
+            
+            .nav-links {
+                padding: 0 10px;
+            }
+            
+            .nav-links a {
+                justify-content: center;
+                padding: 15px 10px;
+            }
+            
+            .nav-links i {
+                margin-right: 0;
+                font-size: 1.4rem;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+                max-width: calc(100% - 70px);
+                padding: 20px;
+            }
+            
+            .cipher-header h2 {
+                font-size: 1.8rem;
+            }
+        }
+        
+        /* Matrix for Playfair */
+        .matrix-container {
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        
+        .matrix {
+            display: inline-grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .matrix-cell {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(76, 201, 240, 0.1);
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .matrix-cell.header {
+            background: rgba(114, 239, 221, 0.3);
+            color: var(--accent3);
+        }
+        
+        /* Mobile menu toggle */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 101;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+            
+            .navbar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .navbar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Menu Toggle -->
+    <button class="menu-toggle" id="menu-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Navigation Sidebar -->
+    <nav class="navbar" id="navbar">
+        <div class="logo">
+            <h1>Crypto Toolbox</h1>
+            <p>Classical Cipher Suite</p>
+        </div>
+        
+        <ul class="nav-links">
+            <li>
+                <a href="#" class="active" data-cipher="vigenere">
+                    <i class="fas fa-key"></i>
+                    <span>Vigenère Cipher</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" data-cipher="playfair">
+                    <i class="fas fa-table"></i>
+                    <span>Playfair Cipher</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" data-cipher="affine">
+                    <i class="fas fa-calculator"></i>
+                    <span>Affine Cipher</span>
+                </a>
+            </li>
+        </ul>
+        
+        <div class="nav-footer">
+            <p>Cryptography Toolbox v1.0</p>
+            <p>Educational Purpose Only</p>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Vigenère Cipher Section -->
+        <section class="cipher-section active" id="vigenere-section">
+            <div class="cipher-header">
+                <h2><i class="fas fa-key"></i> Vigenère Cipher</h2>
+                <p>A polyalphabetic substitution cipher that uses a keyword to shift letters in the message. More secure than simple substitution ciphers.</p>
+            </div>
+            
+            <div class="card-container">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-lock"></i> Encrypt/Decrypt</h3>
+                    
+                    <div class="form-group">
+                        <label for="vigenere-message"><i class="fas fa-font"></i> Message:</label>
+                        <textarea id="vigenere-message" placeholder="Enter your message here...">Meet me at the park at noon</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="vigenere-key"><i class="fas fa-key"></i> Key (Keyword):</label>
+                        <input type="text" id="vigenere-key" placeholder="Enter a keyword (letters only)" value="SECRET">
+                    </div>
+                    
+                    <div class="instructions">
+                        <p><strong>Instructions:</strong></p>
+                        <ul>
+                            <li>Enter your message in the text area</li>
+                            <li>Provide a keyword (letters only, no spaces)</li>
+                            <li>Click <span class="highlight">Encrypt</span> or <span class="highlight">Decrypt</span></li>
+                            <li>Non-alphabet characters will be preserved</li>
+                            <li>Spaces will be removed from output</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button class="encrypt-btn" id="vigenere-encrypt-btn">
+                            <i class="fas fa-lock"></i> Encrypt
+                        </button>
+                        <button class="decrypt-btn" id="vigenere-decrypt-btn">
+                            <i class="fas fa-lock-open"></i> Decrypt
+                        </button>
+                        <button class="clear-btn" id="vigenere-clear-btn">
+                            <i class="fas fa-broom"></i> Clear
+                        </button>
+                    </div>
+                    
+                    <div class="result">
+                        <h3><i class="fas fa-result"></i> Result:</h3>
+                        <div class="result-text" id="vigenere-result">Your encrypted/decrypted message will appear here</div>
+                    </div>
+                </div>
+                
+                <div class="card explanation">
+                    <div class="explanation-content">
+                        <h2><i class="fas fa-info-circle"></i> How the Vigenère Cipher Works</h2>
+                        
+                        <p>The Vigenère cipher is a method of encrypting alphabetic text by using a series of interwoven Caesar ciphers based on the letters of a keyword.</p>
+                        
+                        <div class="algorithm-box">
+                            <p><strong>Algorithm:</strong></p>
+                            <p>For each letter in the plaintext:</p>
+                            <p>1. Find the numeric position (A=0, B=1, ..., Z=25) of the plaintext letter</p>
+                            <p>2. Find the numeric position of the corresponding key letter</p>
+                            <p>3. For encryption: Add the two numbers modulo 26</p>
+                            <p>4. For decryption: Subtract the key number from the ciphertext number modulo 26</p>
+                            <p>5. Convert the result back to a letter</p>
+                        </div>
+                        
+                        <div class="example">
+                            <p><strong>Example:</strong> Message: "HELLO", Key: "KEY"</p>
+                            <p>Key repeated: "KEYKE"</p>
+                            <p>H (7) + K (10) = R (17)</p>
+                            <p>E (4) + E (4) = I (8)</p>
+                            <p>L (11) + Y (24) = J (9) [35 mod 26 = 9]</p>
+                            <p>Result: "RIJ"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Playfair Cipher Section -->
+        <section class="cipher-section" id="playfair-section">
+            <div class="cipher-header">
+                <h2><i class="fas fa-table"></i> Playfair Cipher</h2>
+                <p>A digraph substitution cipher that encrypts pairs of letters (digraphs) using a 5x5 matrix based on a keyword.</p>
+            </div>
+            
+            <div class="card-container">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-lock"></i> Encrypt/Decrypt</h3>
+                    
+                    <div class="form-group">
+                        <label for="playfair-message"><i class="fas fa-font"></i> Message:</label>
+                        <textarea id="playfair-message" placeholder="Enter your message here...">Hide the gold in the tree stump</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="playfair-key"><i class="fas fa-key"></i> Key (Keyword):</label>
+                        <input type="text" id="playfair-key" placeholder="Enter a keyword (letters only)" value="PLAYFAIR EXAMPLE">
+                    </div>
+                    
+                    <div class="instructions">
+                        <p><strong>Instructions:</strong></p>
+                        <ul>
+                            <li>Message will be converted to uppercase</li>
+                            <li>J will be treated as I (or I/J combined)</li>
+                            <li>Repeated letters in digraphs will be separated with X</li>
+                            <li>If message length is odd, X will be added at the end</li>
+                            <li>Spaces will be removed from output</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button class="encrypt-btn" id="playfair-encrypt-btn">
+                            <i class="fas fa-lock"></i> Encrypt
+                        </button>
+                        <button class="decrypt-btn" id="playfair-decrypt-btn">
+                            <i class="fas fa-lock-open"></i> Decrypt
+                        </button>
+                        <button class="clear-btn" id="playfair-clear-btn">
+                            <i class="fas fa-broom"></i> Clear
+                        </button>
+                    </div>
+                    
+                    <div class="result">
+                        <h3><i class="fas fa-result"></i> Result:</h3>
+                        <div class="result-text" id="playfair-result">Your encrypted/decrypted message will appear here</div>
+                    </div>
+                    
+                    <div class="matrix-container">
+                        <h3><i class="fas fa-table"></i> Playfair Matrix:</h3>
+                        <div class="matrix" id="playfair-matrix">
+                            <!-- Matrix will be generated here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card explanation">
+                    <div class="explanation-content">
+                        <h2><i class="fas fa-info-circle"></i> How the Playfair Cipher Works</h2>
+                        
+                        <p>The Playfair cipher uses a 5x5 matrix of letters constructed from a keyword. The letters I and J are usually combined.</p>
+                        
+                        <div class="algorithm-box">
+                            <p><strong>Encryption Rules:</strong></p>
+                            <p>1. Split the message into digraphs (pairs of letters)</p>
+                            <p>2. If both letters are in the same row: replace with letters to the right (wrapping around)</p>
+                            <p>3. If both letters are in the same column: replace with letters below (wrapping around)</p>
+                            <p>4. Otherwise: form a rectangle and replace with letters on the same row but opposite corners</p>
+                        </div>
+                        
+                        <div class="example">
+                            <p><strong>Example Matrix (Key: "PLAYFAIR"):</strong></p>
+                            <p>P L A Y F</p>
+                            <p>I R B C D</p>
+                            <p>E G H K M</p>
+                            <p>N O Q S T</p>
+                            <p>U V W X Z</p>
+                            <p><strong>Example:</strong> "HI" -> "DE" (same column)</p>
+                            <p>"DE" -> "HI" (same column, decryption)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Affine Cipher Section -->
+        <section class="cipher-section" id="affine-section">
+            <div class="cipher-header">
+                <h2><i class="fas fa-calculator"></i> Affine Cipher</h2>
+                <p>A monoalphabetic substitution cipher where each letter is mapped to its numeric equivalent, encrypted with a mathematical function, and then converted back to a letter.</p>
+            </div>
+            
+            <div class="card-container">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-lock"></i> Encrypt/Decrypt</h3>
+                    
+                    <div class="form-group">
+                        <label for="affine-message"><i class="fas fa-font"></i> Message:</label>
+                        <textarea id="affine-message" placeholder="Enter your message here...">Attack at dawn</textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="affine-a">Multiplier (a):</label>
+                        <input type="number" id="affine-a" min="1" max="25" value="5">
+                        <small>Must be coprime with 26 (1,3,5,7,9,11,15,17,19,21,23,25)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="affine-b">Shift (b):</label>
+                        <input type="number" id="affine-b" min="0" max="25" value="8">
+                    </div>
+                    
+                    <div class="instructions">
+                        <p><strong>Instructions:</strong></p>
+                        <ul>
+                            <li>Enter your message in the text area</li>
+                            <li>Choose 'a' (must be coprime with 26)</li>
+                            <li>Choose 'b' (any number 0-25)</li>
+                            <li>Click <span class="highlight">Encrypt</span> or <span class="highlight">Decrypt</span></li>
+                            <li>Non-alphabet characters will be preserved</li>
+                            <li>Spaces will be removed from output</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button class="encrypt-btn" id="affine-encrypt-btn">
+                            <i class="fas fa-lock"></i> Encrypt
+                        </button>
+                        <button class="decrypt-btn" id="affine-decrypt-btn">
+                            <i class="fas fa-lock-open"></i> Decrypt
+                        </button>
+                        <button class="clear-btn" id="affine-clear-btn">
+                            <i class="fas fa-broom"></i> Clear
+                        </button>
+                    </div>
+                    
+                    <div class="result">
+                        <h3><i class="fas fa-result"></i> Result:</h3>
+                        <div class="result-text" id="affine-result">Your encrypted/decrypted message will appear here</div>
+                    </div>
+                </div>
+                
+                <div class="card explanation">
+                    <div class="explanation-content">
+                        <h2><i class="fas fa-info-circle"></i> How the Affine Cipher Works</h2>
+                        
+                        <p>The Affine cipher is a type of monoalphabetic substitution cipher where each letter in an alphabet is mapped to its numeric equivalent, encrypted using a simple mathematical function, and converted back to a letter.</p>
+                        
+                        <div class="algorithm-box">
+                            <p><strong>Encryption Formula:</strong></p>
+                            <p>E(x) = (ax + b) mod 26</p>
+                            <p><strong>Decryption Formula:</strong></p>
+                            <p>D(x) = a⁻¹(x - b) mod 26</p>
+                            <p>Where a⁻¹ is the modular multiplicative inverse of a modulo 26</p>
+                        </div>
+                        
+                        <div class="example">
+                            <p><strong>Example:</strong> a=5, b=8</p>
+                            <p>Encrypt "A" (0): (5×0 + 8) mod 26 = 8 → "I"</p>
+                            <p>Encrypt "T" (19): (5×19 + 8) mod 26 = (95+8) mod 26 = 103 mod 26 = 25 → "Z"</p>
+                            <p>Decrypt "I" (8): a⁻¹ = 21 (since 5×21 mod 26 = 105 mod 26 = 1)</p>
+                            <p>21×(8-8) mod 26 = 0 → "A"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // DOM Elements
+        const menuToggle = document.getElementById('menu-toggle');
+        const navbar = document.getElementById('navbar');
+        const navLinks = document.querySelectorAll('.nav-links a');
+        const cipherSections = document.querySelectorAll('.cipher-section');
+        
+        // Toggle mobile menu
+        menuToggle.addEventListener('click', () => {
+            navbar.classList.toggle('active');
+        });
+        
+        // Switch between cipher sections
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Remove active class from all links
+                navLinks.forEach(l => l.classList.remove('active'));
+                
+                // Add active class to clicked link
+                link.classList.add('active');
+                
+                // Hide all cipher sections
+                cipherSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // Show the selected cipher section
+                const cipher = link.getAttribute('data-cipher');
+                document.getElementById(`${cipher}-section`).classList.add('active');
+                
+                // Close mobile menu if open
+                if (window.innerWidth <= 768) {
+                    navbar.classList.remove('active');
+                }
+            });
+        });
+        
+        // ==================== VIGENÈRE CIPHER ====================
+        const vigenereEncryptBtn = document.getElementById('vigenere-encrypt-btn');
+        const vigenereDecryptBtn = document.getElementById('vigenere-decrypt-btn');
+        const vigenereClearBtn = document.getElementById('vigenere-clear-btn');
+        const vigenereResult = document.getElementById('vigenere-result');
+        
+        vigenereEncryptBtn.addEventListener('click', async () => {
+            await processVigenere('encrypt');
+        });
+        
+        vigenereDecryptBtn.addEventListener('click', async () => {
+            await processVigenere('decrypt');
+        });
+        
+        vigenereClearBtn.addEventListener('click', () => {
+            document.getElementById('vigenere-message').value = '';
+            document.getElementById('vigenere-key').value = '';
+            vigenereResult.textContent = 'Your encrypted/decrypted message will appear here';
+        });
+        
+        async function processVigenere(mode) {
+            const text = document.getElementById('vigenere-message').value;
+            const key = document.getElementById('vigenere-key').value;
+            
+            if (!text.trim()) {
+                vigenereResult.textContent = 'Please enter a message.';
+                return;
+            }
+            
+            if (!key.trim()) {
+                vigenereResult.textContent = 'Please enter a valid keyword.';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/vigenere', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        key: key,
+                        mode: mode
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    vigenereResult.textContent = data.result;
+                } else {
+                    vigenereResult.textContent = 'Error: ' + data.error;
+                }
+            } catch (error) {
+                vigenereResult.textContent = 'Error connecting to server: ' + error.message;
+            }
+        }
+        
+        // ==================== PLAYFAIR CIPHER ====================
+        const playfairEncryptBtn = document.getElementById('playfair-encrypt-btn');
+        const playfairDecryptBtn = document.getElementById('playfair-decrypt-btn');
+        const playfairClearBtn = document.getElementById('playfair-clear-btn');
+        const playfairResult = document.getElementById('playfair-result');
+        const playfairMatrix = document.getElementById('playfair-matrix');
+        
+        playfairEncryptBtn.addEventListener('click', async () => {
+            await processPlayfair('encrypt');
+        });
+        
+        playfairDecryptBtn.addEventListener('click', async () => {
+            await processPlayfair('decrypt');
+        });
+        
+        playfairClearBtn.addEventListener('click', () => {
+            document.getElementById('playfair-message').value = '';
+            document.getElementById('playfair-key').value = '';
+            playfairResult.textContent = 'Your encrypted/decrypted message will appear here';
+            generatePlayfairMatrix('PLAYFAIREXAMPLE');
+        });
+        
+        async function processPlayfair(mode) {
+            const text = document.getElementById('playfair-message').value;
+            const key = document.getElementById('playfair-key').value || 'PLAYFAIREXAMPLE';
+            
+            if (!text.trim()) {
+                playfairResult.textContent = 'Please enter a message.';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/playfair', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        key: key,
+                        mode: mode
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    playfairResult.textContent = data.result;
+                    if (data.matrix) {
+                        displayPlayfairMatrix(data.matrix);
+                    }
+                } else {
+                    playfairResult.textContent = 'Error: ' + data.error;
+                }
+            } catch (error) {
+                playfairResult.textContent = 'Error connecting to server: ' + error.message;
+            }
+        }
+        
+        function displayPlayfairMatrix(matrix) {
+            playfairMatrix.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                for (let j = 0; j < 5; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'matrix-cell';
+                    cell.textContent = matrix[i * 5 + j];
+                    playfairMatrix.appendChild(cell);
+                }
+            }
+        }
+        
+        // ==================== AFFINE CIPHER ====================
+        const affineEncryptBtn = document.getElementById('affine-encrypt-btn');
+        const affineDecryptBtn = document.getElementById('affine-decrypt-btn');
+        const affineClearBtn = document.getElementById('affine-clear-btn');
+        const affineResult = document.getElementById('affine-result');
+        
+        affineEncryptBtn.addEventListener('click', async () => {
+            await processAffine('encrypt');
+        });
+        
+        affineDecryptBtn.addEventListener('click', async () => {
+            await processAffine('decrypt');
+        });
+        
+        affineClearBtn.addEventListener('click', () => {
+            document.getElementById('affine-message').value = '';
+            document.getElementById('affine-a').value = '5';
+            document.getElementById('affine-b').value = '8';
+            affineResult.textContent = 'Your encrypted/decrypted message will appear here';
+        });
+        
+        async function processAffine(mode) {
+            const text = document.getElementById('affine-message').value;
+            const a = parseInt(document.getElementById('affine-a').value);
+            const b = parseInt(document.getElementById('affine-b').value);
+            
+            if (!text.trim()) {
+                affineResult.textContent = 'Please enter a message.';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/affine', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        a: a,
+                        b: b,
+                        mode: mode
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    affineResult.textContent = data.result;
+                } else {
+                    affineResult.textContent = 'Error: ' + data.error;
+                }
+            } catch (error) {
+                affineResult.textContent = 'Error connecting to server: ' + error.message;
+            }
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            // Display initial Playfair matrix
+            generatePlayfairMatrix('PLAYFAIREXAMPLE');
+        });
+        
+        function generatePlayfairMatrix(keyword) {
+            // Simple client-side matrix generation for display
+            let key = keyword.toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+            let keySet = new Set(key);
+            let alphabet = 'ABCDEFGHIKLMNOPQRSTUVWXYZ';
+            let matrix = [];
+            
+            for (let char of keySet) {
+                matrix.push(char);
+            }
+            
+            for (let char of alphabet) {
+                if (!keySet.has(char)) {
+                    matrix.push(char);
+                }
+            }
+            
+            displayPlayfairMatrix(matrix.slice(0, 25));
+        }
+    </script>
+</body>
+</html>
