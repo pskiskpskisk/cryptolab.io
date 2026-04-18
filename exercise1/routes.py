@@ -4,7 +4,12 @@ from . import ex1_bp
 from .vigenere import vigenere_encrypt, vigenere_decrypt
 from .affine import affine_encrypt, affine_decrypt
 from .playfair import playfair_encrypt, playfair_decrypt
-from .number_theory import gcd, extended_gcd, mod_inverse, modexp, is_probable_prime
+from .number_theory import (
+    gcd, gcd_with_steps,
+    extended_gcd, extended_gcd_with_steps,
+    mod_inverse, modexp, modexp_with_steps,
+    is_probable_prime, is_probable_prime_with_steps,
+)
 
 
 @ex1_bp.route('/vigenere', methods=['GET', 'POST'])
@@ -66,14 +71,15 @@ def extended_euclidean_route():
             a = int(request.form.get('a', '0'))
             b = int(request.form.get('b', '0'))
             
-            # Extended Euclidean
-            g, x, y = extended_gcd(a, b)
+            # Extended Euclidean with steps
+            g, x, y, ext_steps = extended_gcd_with_steps(a, b)
             data['a'] = a
             data['b'] = b
             data['gcd'] = g
             data['x'] = x
             data['y'] = y
             data['identity'] = f"{a}*{x} + {b}*{y} = {g}"
+            data['ext_steps'] = ext_steps
             
             # Modular inverse
             try:
@@ -100,13 +106,14 @@ def fermat_theorem_route():
             if n <= 1:
                 raise ValueError('n must be greater than 1')
             
-            # Fermat's Little Theorem test
-            is_prime = is_probable_prime(n)
+            # Fermat's Little Theorem test with intermediate steps
+            is_prime, primality_steps = is_probable_prime_with_steps(n)
             
             # If prime, verify Fermat's condition with given a
             fermat_holds = None
+            fermat_steps = []
             if n > 2 and 0 < a < n:
-                fermat_result = modexp(a, n - 1, n)
+                fermat_result, fermat_steps = modexp_with_steps(a, n - 1, n)
                 fermat_holds = (fermat_result == 1)
             
             data['n'] = n
@@ -114,6 +121,8 @@ def fermat_theorem_route():
             data['is_prime'] = is_prime
             data['fermat_result'] = fermat_result if fermat_holds is not None else None
             data['fermat_holds'] = fermat_holds
+            data['fermat_steps'] = fermat_steps
+            data['primality_steps'] = primality_steps
             
             result = data
         except Exception as e:
@@ -130,14 +139,24 @@ def number_theory_route():
         try:
             a = int(request.form.get('a', '0'))
             b = int(request.form.get('b', '0'))
-            data['gcd'] = gcd(a, b)
+            g, gcd_steps = gcd_with_steps(a, b)
+            data['gcd'] = g
+            data['gcd_steps'] = gcd_steps
             try:
                 data['a_inv_mod_b'] = mod_inverse(a, b)
             except Exception as ex:
                 data['a_inv_mod_b'] = str(ex)
-            data['a_pow_b_mod'] = modexp(a, b, max(2, b))
-            data['a_prime'] = is_probable_prime(a)
-            data['b_prime'] = is_probable_prime(b)
+            # modular exponentiation with steps
+            mod = max(2, b)
+            pow_res, modexp_steps = modexp_with_steps(a, b, mod)
+            data['a_pow_b_mod'] = pow_res
+            data['modexp_steps'] = modexp_steps
+            a_prime, a_prime_steps = is_probable_prime_with_steps(a)
+            b_prime, b_prime_steps = is_probable_prime_with_steps(b)
+            data['a_prime'] = a_prime
+            data['b_prime'] = b_prime
+            data['a_prime_steps'] = a_prime_steps
+            data['b_prime_steps'] = b_prime_steps
             result = data
         except Exception as e:
             error = str(e)

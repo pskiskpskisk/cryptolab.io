@@ -52,9 +52,21 @@
       background: #f8d7da;
       color: #721c24;
     }
+    .step-box {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-left: 4px solid #4f6df5;
+      border-radius: 6px;
+      padding: 10px;
+      margin: 8px 0;
+      font-family: Consolas, monospace;
+      font-size: 0.88rem;
+      color: #334155;
+      word-break: break-word;
+    }
   </style>
 </head>
-<body>
+<body class="theme-ex1">
   <aside class="sidebar">
     <div class="logo">CRYPTO LAB</div>
     <nav>
@@ -99,6 +111,26 @@
               {% endif %}
             </div>
             {% endif %}
+            {% if result.fermat_steps %}
+            <div style="margin-top: 10px;">
+              <div style="font-weight: 700; color: #4f6df5; margin-bottom: 6px;">Intermediate Steps for a^(n-1) mod n</div>
+              {% for s in result.fermat_steps %}
+                {% if s.stage is defined %}
+                  <div class="step-box">stage={{ s.stage }}, base={{ s.base if s.base is defined else '-' }}, exp={{ s.exp if s.exp is defined else '-' }}, result={{ s.result if s.result is defined else '-' }}</div>
+                {% elif s.action is defined and s.action == 'multiply' %}
+                  <div class="step-box">action=multiply, exp_bit=1, base={{ s.base }}, result={{ s.result }}</div>
+                {% elif s.action is defined and s.action == 'skip_multiply' %}
+                  <div class="step-box">action=skip multiply, exp_bit=0, base={{ s.base }}, result={{ s.result }}</div>
+                {% elif s.action is defined and s.action == 'square' %}
+                  <div class="step-box">action=square base, new_base={{ s.new_base }}</div>
+                {% elif s.action is defined and s.action == 'shift' %}
+                  <div class="step-box">action=shift exponent, exp_remaining={{ s.exp_remaining }}</div>
+                {% else %}
+                  <div class="step-box">{{ s }}</div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            {% endif %}
           </div>
 
           <!-- Miller-Rabin Primality Test -->
@@ -124,6 +156,26 @@
                 Definitively composite
               {% endif %}
             </p>
+            {% if result.primality_steps %}
+            <div style="margin-top: 10px;">
+              <div style="font-weight: 700; color: #4f6df5; margin-bottom: 6px;">Intermediate Steps for Miller-Rabin</div>
+              {% for s in result.primality_steps %}
+                {% if s.round is defined %}
+                  <div class="step-box">round={{ s.round }}, witness a={{ s.a }}, details={{ s.local_steps }}</div>
+                {% elif s.decompose is defined %}
+                  <div class="step-box">decompose: {{ s.decompose }}</div>
+                {% elif s.result is defined %}
+                  <div class="step-box">final result: {{ 'prime' if s.result else 'composite' }}</div>
+                {% elif s.divisible_by is defined %}
+                  <div class="step-box">quick check: divisible by {{ s.divisible_by }} -> composite</div>
+                {% elif s.found_small_prime is defined %}
+                  <div class="step-box">quick check: matched small prime {{ s.found_small_prime }}</div>
+                {% else %}
+                  <div class="step-box">{{ s }}</div>
+                {% endif %}
+              {% endfor %}
+            </div>
+            {% endif %}
           </div>
 
           <!-- Example: Carmichael Numbers -->

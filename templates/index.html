@@ -19,6 +19,38 @@
             padding: 20px;
             line-height: 1.6;
         }
+
+        body.theme-1 {
+            --hero: linear-gradient(135deg, #1d4ed8 0%, #06b6d4 100%);
+            --accent: #2563eb;
+            --accent-dark: #1d4ed8;
+            --tag-bg: #dbeafe;
+            --tag-fg: #1d4ed8;
+        }
+
+        body.theme-2 {
+            --hero: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+            --accent: #0f766e;
+            --accent-dark: #115e59;
+            --tag-bg: #ccfbf1;
+            --tag-fg: #115e59;
+        }
+
+        body.theme-3 {
+            --hero: linear-gradient(135deg, #92400e 0%, #f59e0b 100%);
+            --accent: #b45309;
+            --accent-dark: #92400e;
+            --tag-bg: #ffedd5;
+            --tag-fg: #9a3412;
+        }
+
+        body.theme-4 {
+            --hero: linear-gradient(135deg, #6d28d9 0%, #ec4899 100%);
+            --accent: #7c3aed;
+            --accent-dark: #6d28d9;
+            --tag-bg: #f3e8ff;
+            --tag-fg: #6d28d9;
+        }
         
         .container {
             max-width: 1200px;
@@ -29,7 +61,7 @@
             text-align: center;
             margin-bottom: 40px;
             padding: 20px;
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            background: var(--hero, linear-gradient(135deg, #6a11cb 0%, #2575fc 100%));
             border-radius: 12px;
             color: white;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
@@ -118,11 +150,11 @@
         }
         
         .tag {
-            background-color: #eef2ff;
+            background-color: var(--tag-bg, #eef2ff);
             padding: 5px 12px;
             border-radius: 20px;
             font-size: 0.85rem;
-            color: #4f6df5;
+            color: var(--tag-fg, #4f6df5);
         }
         
         .card-footer {
@@ -134,7 +166,7 @@
         }
         
         .btn {
-            background-color: #4f6df5;
+            background-color: var(--accent, #4f6df5);
             color: white;
             border: none;
             padding: 8px 16px;
@@ -145,7 +177,7 @@
         }
         
         .btn:hover {
-            background-color: #3a56e4;
+            background-color: var(--accent-dark, #3a56e4);
         }
         
         .btn-disabled {
@@ -233,13 +265,13 @@
         }
         
         .nav-tabs a:hover {
-            color: #4f6df5;
-            border-bottom-color: #4f6df5;
+            color: var(--accent, #4f6df5);
+            border-bottom-color: var(--accent, #4f6df5);
         }
         
         .nav-tabs a.active {
-            color: #4f6df5;
-            border-bottom-color: #4f6df5;
+            color: var(--accent, #4f6df5);
+            border-bottom-color: var(--accent, #4f6df5);
         }
         
         @media (max-width: 480px) {
@@ -350,12 +382,21 @@
             4: [
                 {
                     id: 7,
-                    number: "Ex4",
-                    name: "Hashing",
+                    number: "Ex4-A",
+                    name: "MD5 Hashing",
                     description: "Project details",
                     tags: ["MD5", "Hash"],
                     icon: "fa-fingerprint",
                     url: "{{ url_for('ex4.md5_route') }}"
+                },
+                {
+                    id: 8,
+                    number: "Ex4-B",
+                    name: "DES-CBC MAC",
+                    description: "Project details",
+                    tags: ["CMAC", "DES", "MAC"],
+                    icon: "fa-shield-halved",
+                    url: "{{ url_for('ex4.cmac_route') }}"
                 }
             ]
         };
@@ -376,6 +417,8 @@
         const cardsContainer = document.getElementById('cardsContainer');
         
         function renderCards(exerciseNum) {
+            document.body.classList.remove('theme-1', 'theme-2', 'theme-3', 'theme-4');
+            document.body.classList.add(`theme-${exerciseNum}`);
             cardsContainer.innerHTML = '';
             const exercises = allExercises[exerciseNum] || [];
             

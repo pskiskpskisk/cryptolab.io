@@ -39,7 +39,7 @@
     }
   </style>
 </head>
-<body>
+<body class="theme-ex1">
   <aside class="sidebar">
     <div class="logo">CRYPTO LAB</div>
     <nav>
@@ -113,6 +113,24 @@
               {% endif %}
             </p>
           </div>
+          {% if result.ext_steps %}
+          <div class="algorithm-box">
+            <div class="algorithm-title">Computation Steps (Extended Euclidean)</div>
+            <div style="font-family: monospace; font-size: 0.9rem; margin-top:8px; display:grid; gap:8px;">
+              {% for s in result.ext_steps %}
+                {% if s.q is defined %}
+                  <div style="background:#fff;padding:10px;border-radius:6px;border:1px solid #e2e8f0;">
+                    q={{ s.q }}, old_r={{ s.old_r }}, r={{ s.r }}, old_s={{ s.old_s }}, s={{ s.s }}, old_t={{ s.old_t }}, t={{ s.t }}
+                  </div>
+                {% else %}
+                  <div style="background:#fff;padding:10px;border-radius:6px;border:1px solid #e2e8f0;">
+                    old_r={{ s.old_r }}, r={{ s.r }}, old_s={{ s.old_s }}, s={{ s.s }}, old_t={{ s.old_t }}, t={{ s.t }}
+                  </div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
         </div>
       {% endif %}
     </section>

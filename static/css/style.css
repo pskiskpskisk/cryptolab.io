@@ -438,3 +438,28 @@ button:active {
     .sidebar { width: 100%; height: auto; position: relative; }
     .content { margin-left: 0; width: 100%; padding: 20px; }
 }
+
+/* Exercise-specific themes */
+body.theme-ex1 {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --secondary: #06b6d4;
+}
+
+body.theme-ex2 {
+    --primary: #0f766e;
+    --primary-dark: #115e59;
+    --secondary: #14b8a6;
+}
+
+body.theme-ex3 {
+    --primary: #b45309;
+    --primary-dark: #92400e;
+    --secondary: #f59e0b;
+}
+
+body.theme-ex4 {
+    --primary: #7c3aed;
+    --primary-dark: #6d28d9;
+    --secondary: #ec4899;
+}

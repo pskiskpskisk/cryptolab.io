@@ -37,7 +37,7 @@
     }
   </style>
 </head>
-<body>
+<body class="theme-ex1">
   <aside class="sidebar">
     <div class="logo">CRYPTO LAB</div>
     <nav>
@@ -74,6 +74,16 @@
               <span class="result-label">GCD(a, b):</span>
               <span class="result-value">{{ result.gcd }}</span>
             </div>
+            {% if result.gcd_steps %}
+            <div style="margin-top:10px; font-family:monospace; font-size:0.9rem; background:#fff; padding:8px; border-radius:6px;">
+              <strong>Steps:</strong>
+              <div style="margin-top:6px;">
+                {% for s in result.gcd_steps %}
+                  <div>a={{ s.a }}, b={{ s.b }}, q={{ s.q }}, r={{ s.r }}</div>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
             <p style="font-size: 0.9rem; color: #666; margin: 10px 0;">
               Computes the greatest common divisor using the iterative Euclidean algorithm.
             </p>
@@ -101,9 +111,17 @@
               <span class="result-label">a^b mod b:</span>
               <span class="result-value">{{ result.a_pow_b_mod }}</span>
             </div>
-            <p style="font-size: 0.9rem; color: #666; margin: 10px 0;">
-              Efficiently computes large powers modulo a number using binary exponentiation.
-            </p>
+            <p style="font-size: 0.9rem; color: #666; margin: 10px 0;">Efficiently computes large powers modulo a number using binary exponentiation.</p>
+            {% if result.modexp_steps %}
+            <div style="margin-top:8px; font-family:monospace; background:#fff; padding:8px; border-radius:6px;">
+              <strong>Steps:</strong>
+              <div style="margin-top:6px;">
+                {% for s in result.modexp_steps %}
+                  <div>{{ s }}</div>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
           </div>
 
           <!-- Fermat's Little Theorem / Primality -->
@@ -127,6 +145,26 @@
             <p style="font-size: 0.85rem; color: #999; margin: 8px 0;">
               Uses Miller-Rabin probabilistic test for reliable primality detection.
             </p>
+            {% if result.a_prime_steps %}
+            <div style="margin-top:10px; font-family:monospace; background:#fff; padding:8px; border-radius:6px;">
+              <strong>Primality Steps for a:</strong>
+              <div style="margin-top:6px;">
+                {% for s in result.a_prime_steps %}
+                  <div>{{ s }}</div>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+            {% if result.b_prime_steps %}
+            <div style="margin-top:10px; font-family:monospace; background:#fff; padding:8px; border-radius:6px;">
+              <strong>Primality Steps for b:</strong>
+              <div style="margin-top:6px;">
+                {% for s in result.b_prime_steps %}
+                  <div>{{ s }}</div>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
           </div>
         </div>
       {% endif %}

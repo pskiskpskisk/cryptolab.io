@@ -66,11 +66,29 @@ def split_into_blocks(st: bytes):
 
 # --- 3. Main MD5 Implementation ---
 def md5_hash(message: bytes) -> str:
+    # For backward compatibility call the verbose version and return only the hash
+    res = md5_hash_with_steps(message)
+    return res['hash']
+
+
+def md5_hash_with_steps(message: bytes, log_rounds: bool = True) -> dict:
+    """Compute MD5 and provide intermediate steps for educational display.
+
+    Returns a dict: {
+        'hash': hexstring,
+        'steps': [ {name, description, data}, ... ]
+    }
+    """
+    steps = []
+
     # Initialize MD5 Variables (Magic Numbers)
     a0 = 0x67452301
     b0 = 0xefcdab89
     c0 = 0x98badcfe
     d0 = 0x10325476
+
+    steps.append({'name': 'Init', 'description': 'Initial state (a0,b0,c0,d0)',
+                  'data': f"a0={a0:08x} b0={b0:08x} c0={c0:08x} d0={d0:08x}"})
 
     # Pre-compute K constants and shifts
     K = [int((1 << 32) * abs(math.sin(i + 1))) & 0xFFFFFFFF for i in range(64)]
@@ -81,58 +99,70 @@ def md5_hash(message: bytes) -> str:
         6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21
     ]
 
-    # Process chunks returned by your specific logic
+    steps.append({'name': 'Constants', 'description': 'K and shift arrays prepared', 'data': f"K[0]={K[0]:08x} ... K[63]={K[63]:08x}"})
+
     chunks = split_into_blocks(message)
+    steps.append({'name': 'Blocks', 'description': f'Number of 512-bit blocks: {len(chunks)}', 'data': ''})
 
-    for block in chunks:
-        # EXPLICIT CHECK: Ensure each block output by the function is EXACTLY 512 bits
-        block_size_in_bits = len(block) * 8
-        if block_size_in_bits != 512:
-            raise ValueError(f"Block check failed: Expected 512 bits, got {block_size_in_bits} bits!")
+    # Working copies of state
+    a_cur, b_cur, c_cur, d_cur = a0, b0, c0, d0
 
-        # Unpack 64-byte block into 16 x 32-bit integers WITHOUT struct
-        M = []
-        for k in range(16):
-            chunk_4bytes = block[k*4 : (k+1)*4]
-            M.append(int.from_bytes(chunk_4bytes, byteorder='little'))
+    for blk_idx, block in enumerate(chunks):
+        block_bits = len(block) * 8
+        if block_bits != 512:
+            raise ValueError(f"Block check failed: Expected 512 bits, got {block_bits} bits!")
 
-        # Initialize hash values for this block
-        A, B, C, D = a0, b0, c0, d0
+        # Unpack block into 16 little-endian 32-bit words
+        M = [int.from_bytes(block[k*4:(k+1)*4], byteorder='little') for k in range(16)]
+        steps.append({'name': f'Block {blk_idx+1}', 'description': 'Block bytes (hex)', 'data': block.hex().upper()})
+        steps.append({'name': f'Block {blk_idx+1} - Words', 'description': 'M[0..15] (32-bit little-endian words)',
+                      'data': ' '.join([f"M[{i}]={M[i]:08x}" for i in range(16)])})
 
-        # Main loop: 64 operations
+        A, B, C, D = a_cur, b_cur, c_cur, d_cur
+        steps.append({'name': f'Block {blk_idx+1} - Start State', 'description': 'A,B,C,D at start of block',
+                      'data': f"A={A:08x} B={B:08x} C={C:08x} D={D:08x}"})
+
         for j in range(64):
             if 0 <= j <= 15:
                 f_val = F(B, C, D)
                 g_idx = j
+                f_name = 'F'
             elif 16 <= j <= 31:
                 f_val = G(B, C, D)
                 g_idx = (5 * j + 1) % 16
+                f_name = 'G'
             elif 32 <= j <= 47:
                 f_val = H(B, C, D)
                 g_idx = (3 * j + 5) % 16
-            elif 48 <= j <= 63:
+                f_name = 'H'
+            else:
                 f_val = I(B, C, D)
                 g_idx = (7 * j) % 16
+                f_name = 'I'
 
-            # Core MD5 mixing formula
-            # f_val calculation includes adding A, K[j], and M[g_idx]
             temp = (f_val + A + K[j] + M[g_idx]) & 0xFFFFFFFF
-            A = D
-            D = C
-            C = B
-            B = (B + left_rotate(temp, shifts[j])) & 0xFFFFFFFF
+            A, D, C, B = D, C, B, (B + left_rotate(temp, shifts[j])) & 0xFFFFFFFF
 
-        # Add this block's hash to the cumulative sum
-        a0 = (a0 + A) & 0xFFFFFFFF
-        b0 = (b0 + B) & 0xFFFFFFFF
-        c0 = (c0 + C) & 0xFFFFFFFF
-        d0 = (d0 + D) & 0xFFFFFFFF
+            if log_rounds:
+                steps.append({'name': f'Block {blk_idx+1} Round {j+1}',
+                              'description': f'Function {f_name}, g={g_idx}, shift={shifts[j]}',
+                              'data': f"K={K[j]:08x} M[g]={M[g_idx]:08x} temp={temp:08x} A={A:08x} B={B:08x} C={C:08x} D={D:08x}"})
 
-    # --- 4. Final Output ---
+        a_cur = (a_cur + A) & 0xFFFFFFFF
+        b_cur = (b_cur + B) & 0xFFFFFFFF
+        c_cur = (c_cur + C) & 0xFFFFFFFF
+        d_cur = (d_cur + D) & 0xFFFFFFFF
+
+        steps.append({'name': f'Block {blk_idx+1} - End State', 'description': 'Updated a0,b0,c0,d0 after block',
+                      'data': f"a0={a_cur:08x} b0={b_cur:08x} c0={c_cur:08x} d0={d_cur:08x}"})
+
     final_hash = bytearray()
-    final_hash.extend(a0.to_bytes(4, byteorder='little'))
-    final_hash.extend(b0.to_bytes(4, byteorder='little'))
-    final_hash.extend(c0.to_bytes(4, byteorder='little'))
-    final_hash.extend(d0.to_bytes(4, byteorder='little'))
+    final_hash.extend(a_cur.to_bytes(4, byteorder='little'))
+    final_hash.extend(b_cur.to_bytes(4, byteorder='little'))
+    final_hash.extend(c_cur.to_bytes(4, byteorder='little'))
+    final_hash.extend(d_cur.to_bytes(4, byteorder='little'))
+    final_hex = final_hash.hex()
 
-    return final_hash.hex()
+    steps.append({'name': 'Final', 'description': 'Final MD5 digest (hex)', 'data': final_hex})
+
+    return {'hash': final_hex, 'steps': steps}

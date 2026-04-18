@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DES-CMAC</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .step-container {
+      background: var(--card-bg);
+      border-left: 4px solid var(--primary);
+      margin: 15px 0;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+    
+    .step-title {
+      font-weight: bold;
+      color: var(--primary);
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+    }
+    
+    .step-description {
+      color: var(--text-light);
+      margin-bottom: 8px;
+      font-style: italic;
+    }
+    
+    .step-data {
+      background: #0f172a;
+      padding: 10px;
+      border-radius: 3px;
+      word-break: break-all;
+      color: #e2e8f0;
+      border: 1px solid #334155;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: var(--text-light);
+    }
+    
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background: var(--input-bg);
+      color: var(--text);
+      font-family: 'Courier New', monospace;
+      box-sizing: border-box;
+    }
+    
+    .form-group textarea {
+      resize: vertical;
+      height: 80px;
+    }
+    
+    .mac-output {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .output-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 15px;
+      border-radius: 4px;
+    }
+    
+    .output-card h4 {
+      color: var(--primary);
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+    
+    .output-box {
+      background: #0f172a;
+      padding: 10px;
+      border-radius: 3px;
+      word-break: break-all;
+      color: #f8fafc;
+      border: 1px solid #334155;
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+    
+    .info-item {
+      background: var(--card-bg);
+      padding: 10px;
+      border-radius: 4px;
+      border-left: 3px solid var(--warning);
+    }
+    
+    .info-label {
+      color: var(--text-light);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+    }
+    
+    .info-value {
+      color: #0f172a;
+      font-weight: bold;
+      word-break: break-all;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .steps-section {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px solid var(--border-color);
+    }
+    
+    .steps-title {
+      font-size: 1.3rem;
+      color: var(--primary);
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    
+    .error-message {
+      background: rgba(220, 53, 69, 0.1);
+      border-left: 4px solid #dc3545;
+      color: #ff6b6b;
+      padding: 12px;
+      border-radius: 4px;
+      margin: 15px 0;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    button {
+      flex: 1;
+    }
+    
+    .algorithm-section {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 15px;
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+    
+    .algorithm-section h3 {
+      color: var(--primary);
+      margin-top: 0;
+    }
+    
+    .algorithm-text {
+      color: var(--text-light);
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body class="theme-ex4">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">CRYPTO LAB</div>
+    <nav>
+      <ul>
+        <li><a href="{{ url_for('root') }}">← Back to Home</a></li>
+        <li style="margin-top: 20px; font-weight: bold; color: #aaa; font-size: 0.9rem;">Exercise 4 - Authentication:</li>
+        <li><a href="{{ url_for('ex4.md5_route') }}">MD5 Hashing</a></li>
+        <li><a href="{{ url_for('ex4.cmac_route') }}" style="color: #fff; font-weight: bold;">CMAC (MAC)</a></li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <header>
+      <h1>DES-CMAC</h1>
+      <p style="color:var(--text-light);">Message authentication using CMAC with DES block cipher (fixed 8-byte MAC)</p>
+    </header>
+
+    <!-- Algorithm Explanation -->
+    <section class="algorithm-section">
+      <h3>Algorithm Overview</h3>
+      <div class="algorithm-text">
+        <strong>DES-CMAC:</strong> CMAC derives two subkeys from the main DES key and uses them
+        in the final-block step before producing the MAC tag.
+        <br><br>
+        <strong>Key Steps:</strong>
+        <ol>
+          <li>Normalize key to DES key size (8 bytes)</li>
+          <li>Compute L = E<sub>K</sub>(0<sup>64</sup>)</li>
+          <li>Generate K1 and K2 from L (CMAC doubling)</li>
+          <li>Check if last message block is complete</li>
+          <li>If complete use K1, else pad and use K2</li>
+          <li>Run CMAC chaining and output final 8-byte tag</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Input Form -->
+    <section class="form-section">
+      <h2>MAC Generator</h2>
+      <form method="POST">
+        <div class="form-group">
+          <label>Message</label>
+          <textarea name="text" placeholder="Enter message to authenticate..." required>{{ input_text if input_text else '' }}</textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>CMAC Key (Hex or Text)</label>
+          <input type="text" name="key" placeholder="Enter 16 hex chars (8 bytes) or plain text" value="{{ key_input if key_input else '' }}" required>
+          <small style="color: var(--text-light); display: block; margin-top: 5px;">
+            Example hex key: 133457799BBCDFF1. Plain text keys are padded/truncated to 8 bytes.
+          </small>
+        </div>
+        
+        <div class="button-group">
+          <button type="submit" style="background: var(--success);">Generate MAC</button>
+          <button type="reset" style="background: var(--text-light); color: var(--bg);">Clear</button>
+        </div>
+      </form>
+
+      {% if error %}
+      <div class="error-message">Error: {{ error }}</div>
+      {% endif %}
+
+      {% if result %}
+      <!-- Output Section -->
+      <div class="mac-output">
+        <div class="output-card">
+          <h4>Generated MAC</h4>
+          <div class="output-box">{{ result.mac_hex }}</div>
+        </div>
+        <div class="output-card">
+          <h4>MAC Length</h4>
+          <div class="output-box">8 bytes (64 bits)</div>
+        </div>
+      </div>
+
+      <!-- Key and Message Info -->
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">DES Key</div>
+          <div class="info-value">{{ result.key_hex }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Message Length</div>
+          <div class="info-value">{{ result.message_len }} bytes</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Key Size</div>
+          <div class="info-value">{{ result.key_hex|length // 2 }} bytes</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Algorithm</div>
+          <div class="info-value">DES-CMAC</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">K1</div>
+          <div class="info-value">{{ result.k1_hex }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">K2</div>
+          <div class="info-value">{{ result.k2_hex }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Last Block Status</div>
+          <div class="info-value">{{ 'Perfect (8 bytes)' if result.last_block_complete else 'Not Perfect (padded)' }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Selected Subkey</div>
+          <div class="info-value">{{ result.selected_subkey }}</div>
+        </div>
+      </div>
+
+      <!-- Intermediate Steps -->
+      {% if steps %}
+      <div class="steps-section">
+        <h3 class="steps-title">Computation Steps (Intermediate Values)</h3>
+        
+        {% for step in steps %}
+        <div class="step-container">
+          <div class="step-title">{{ step.name }}</div>
+          <div class="step-description">{{ step.description }}</div>
+          {% if step.data %}
+          <div class="step-data">{{ step.data }}</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>
