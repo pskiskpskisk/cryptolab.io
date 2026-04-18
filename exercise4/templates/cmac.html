@@ -198,24 +198,6 @@
       <p style="color:var(--text-light);">Message authentication using CMAC with DES block cipher (fixed 8-byte MAC)</p>
     </header>
 
-    <!-- Algorithm Explanation -->
-    <section class="algorithm-section">
-      <h3>Algorithm Overview</h3>
-      <div class="algorithm-text">
-        <strong>DES-CMAC:</strong> CMAC derives two subkeys from the main DES key and uses them
-        in the final-block step before producing the MAC tag.
-        <br><br>
-        <strong>Key Steps:</strong>
-        <ol>
-          <li>Normalize key to DES key size (8 bytes)</li>
-          <li>Compute L = E<sub>K</sub>(0<sup>64</sup>)</li>
-          <li>Generate K1 and K2 from L (CMAC doubling)</li>
-          <li>Check if last message block is complete</li>
-          <li>If complete use K1, else pad and use K2</li>
-          <li>Run CMAC chaining and output final 8-byte tag</li>
-        </ol>
-      </div>
-    </section>
 
     <!-- Input Form -->
     <section class="form-section">
